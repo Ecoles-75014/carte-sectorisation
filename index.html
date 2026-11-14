@@ -102,9 +102,10 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
         <div class="seg" id="grp"><button aria-pressed="true" data-v="AB">A et B</button><button aria-pressed="false" data-v="A">Secteur A</button><button aria-pressed="false" data-v="B">Secteur B</button></div>
       </div>
       <div class="row" style="margin-top:8px">
-        <label class="chk"><input type="checkbox" id="cFlux" checked> Flux annoncés</label>
+        <label class="chk"><input type="checkbox" id="cFlux" checked> Flèches</label>
         <label class="chk"><input type="checkbox" id="cMoved" checked> Zones déplacées</label>
         <label class="chk"><input type="checkbox" id="cLab" checked> Noms des écoles</label>
+        <label class="chk"><input type="checkbox" id="cEff" checked> Effectifs estimés</label>
       </div>
       <div class="row" style="margin-top:4px">
         <span class="small muted">Carroyage :</span>
@@ -305,7 +306,7 @@ const schoolOf=a=>VIEW==='r26'?a.properties.s26:(VIEW==='r27'?a.properties.s27:(
 const svg=d3.select('#map'), g=svg.append('g');
 const gAtoms=g.append('g'), gGrid=g.append('g'), gOut=g.append('g'), gMoved=g.append('g'), gFlux=g.append('g'), gSch=g.append('g');
 const proj=d3.geoMercator(); const path=d3.geoPath(proj);
-svg.append('defs').html('<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker>');
+svg.append('defs').html('<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker><marker id="arrS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#c0262d"/></marker>');
 const zoom=d3.zoom().scaleExtent([0.8,14]).on('zoom',e=>{g.attr('transform',e.transform); g.selectAll('.lbl').attr('font-size',11/e.transform.k).attr('stroke-width',3/e.transform.k); g.selectAll('.sch').attr('r',4.5/e.transform.k).attr('stroke-width',1.5/e.transform.k); gFlux.selectAll('path').attr('stroke-width',2/e.transform.k); gFlux.selectAll('text').attr('font-size',10.5/e.transform.k).attr('stroke-width',3/e.transform.k); gAtoms.selectAll('path').attr('stroke-width',0.4/e.transform.k); gMoved.selectAll('path').attr('stroke-width',1.6/e.transform.k).attr('stroke-dasharray',`${3/e.transform.k} ${2/e.transform.k}`); gOut.selectAll('path').attr('stroke-width',0.7/e.transform.k); gGrid.selectAll('path').attr('stroke-width',0.3/e.transform.k); gLasso.selectAll('path').attr('stroke-width',2/e.transform.k)});
 svg.call(zoom);
 ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.getElementById('mapwrap').addEventListener(ev,e=>e.preventDefault(),{passive:false}));
@@ -344,28 +345,38 @@ function draw(){
   gMoved.selectAll('path').data(M,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke','var(--ink)').attr('stroke-width',1.6/d3.zoomTransform(svg.node()).k).attr('stroke-dasharray',`${3/d3.zoomTransform(svg.node()).k} ${2/d3.zoomTransform(svg.node()).k}`).style('pointer-events','none');
   // flows
   const S=DATA[LV].schools;
-  const F=document.getElementById('cFlux').checked&&VIEW!=='r26'?DATA.flows.filter(f=>f.lv===LV&&f.annonce!=null&&(GRP==='AB'||f.grp===GRP)):[];
-  const fl=F.map(f=>{const at=A.filter(a=>a.properties.s26===f.de&&a.properties.s27===f.vers);
+  const showF=document.getElementById('cFlux').checked&&VIEW!=='r26';
+  let fl=[];
+  if(showF&&VIEW==='r27'){
+    const F=DATA.flows.filter(f=>f.lv===LV&&f.annonce!=null&&(GRP==='AB'||f.grp===GRP));
+    fl=F.map(f=>{const at=A.filter(a=>a.properties.s26===f.de&&a.properties.s27===f.vers);
      let o; if(at.length){const c=at.map(a=>path.centroid(a)); const w=at.map(a=>a.properties.est+0.1); const W=d3.sum(w); o=[d3.sum(c,(p,i)=>p[0]*w[i])/W,d3.sum(c,(p,i)=>p[1]*w[i])/W];}
      else if(S[f.de]&&S[f.de].pt) o=proj(S[f.de].pt);
-     const t=S[f.vers]&&S[f.vers].pt?proj(S[f.vers].pt):null; return o&&t?{...f,o,t}:null}).filter(Boolean);
+     const t=S[f.vers]&&S[f.vers].pt?proj(S[f.vers].pt):null; return o&&t?{de:f.de,vers:f.vers,lab:String(f.annonce),o,t,sc:false}:null}).filter(Boolean);
+  } else if(showF&&VIEW==='scen'){
+    const groups=d3.group(A.filter(a=>schoolOf(a)!==a.properties.s26),a=>a.properties.s26+'→'+schoolOf(a));
+    groups.forEach((at,key)=>{ const [de,vers]=key.split('→'); const c=at.map(a=>path.centroid(a)); const w=at.map(a=>a.properties.est+0.1); const W=d3.sum(w);
+      const o=[d3.sum(c,(p,i)=>p[0]*w[i])/W,d3.sum(c,(p,i)=>p[1]*w[i])/W]; const t=S[vers]&&S[vers].pt?proj(S[vers].pt):null; const n=d3.sum(at,a=>a.properties.est);
+      if(t) fl.push({de,vers,lab:n<1?'<1':'≈'+Math.round(n),o,t,sc:true}); });
+  }
   const k=d3.zoomTransform(svg.node()).k;
-  const fg=gFlux.selectAll('g').data(fl,d=>d.de+d.vers).join(en=>{const x=en.append('g');x.append('path');x.append('text');return x;});
+  const fg=gFlux.selectAll('g').data(fl,d=>d.de+'→'+d.vers+(d.sc?'s':'')).join(en=>{const x=en.append('g');x.append('path');x.append('text');return x;});
   fg.select('path').attr('d',d=>{const [x0,y0]=d.o,[x1,y1]=d.t; const mx=(x0+x1)/2-(y1-y0)*0.15, my=(y0+y1)/2+(x1-x0)*0.15; return `M${x0},${y0}Q${mx},${my} ${x1},${y1}`})
-    .attr('fill','none').attr('stroke','var(--ink)').attr('stroke-width',2/k).attr('marker-end','url(#arr)').style('color','var(--ink)').attr('opacity',0.8);
-  fg.select('text').attr('x',d=>(d.o[0]+d.t[0])/2-(d.t[1]-d.o[1])*0.075).attr('y',d=>(d.o[1]+d.t[1])/2+(d.t[0]-d.o[0])*0.075).text(d=>d.annonce).attr('font-size',10.5/k).attr('font-weight',600).attr('text-anchor','middle').attr('fill','var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3/k).attr('paint-order','stroke');
+    .attr('fill','none').attr('stroke',d=>d.sc?'#c0262d':'var(--ink)').attr('stroke-width',2/k).attr('marker-end',d=>d.sc?'url(#arrS)':'url(#arr)').style('color','var(--ink)').attr('opacity',0.85);
+  fg.select('text').attr('x',d=>(d.o[0]+d.t[0])/2-(d.t[1]-d.o[1])*0.075).attr('y',d=>(d.o[1]+d.t[1])/2+(d.t[0]-d.o[0])*0.075).text(d=>d.lab).attr('font-size',10.5/k).attr('font-weight',600).attr('text-anchor','middle').attr('fill',d=>d.sc?'#c0262d':'var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3/k).attr('paint-order','stroke');
   // schools
+  const TOT=totals(VIEW==='r26'?'r26':(VIEW==='r27'?'r27':'scen'));
   const SS=Object.entries(S).filter(([n,v])=>v.pt&&inGrp(n));
   const sg=gSch.selectAll('g').data(SS,d=>d[0]).join(en=>{const x=en.append('g');x.append('circle').attr('class','sch');x.append('text').attr('class','lbl');return x;});
   sg.select('circle').attr('cx',d=>proj(d[1].pt)[0]).attr('cy',d=>proj(d[1].pt)[1]).attr('r',4.5/k)
-    .attr('fill',d=>d[1].ferme&&VIEW!=='r26'?'var(--panel)':col(d[0])).attr('stroke',d=>d[1].ferme&&VIEW!=='r26'?'var(--warn)':'var(--ink)').attr('stroke-width',1.5/k);
-  sg.select('text').attr('x',d=>proj(d[1].pt)[0]+6/k).attr('y',d=>proj(d[1].pt)[1]-5/k).text(d=>d[0]+(d[1].ferme&&VIEW!=='r26'?' (fermeture)':'')).attr('font-size',11/k).attr('font-weight',600).attr('fill','var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3/k).attr('paint-order','stroke').style('display',document.getElementById('cLab').checked?null:'none').style('pointer-events','none');
+    .attr('fill',d=>d[1].ferme&&VIEW!=='r26'&&!(TOT[d[0]]>=1)?'var(--panel)':col(d[0])).attr('stroke',d=>d[1].ferme&&VIEW!=='r26'&&!(TOT[d[0]]>=1)?'var(--warn)':'var(--ink)').attr('stroke-width',1.5/k);
+  sg.select('text').attr('x',d=>proj(d[1].pt)[0]+6/k).attr('y',d=>proj(d[1].pt)[1]-5/k).text(d=>{ const v=TOT[d[0]]||0; const closed=d[1].ferme&&VIEW!=='r26'&&v<1; return d[0]+(closed?' (fermeture)':'')+(document.getElementById('cEff').checked&&!closed?` · ≈${fmt(v)}`:''); }).attr('font-size',11/k).attr('font-weight',600).attr('fill','var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3/k).attr('paint-order','stroke').style('display',document.getElementById('cLab').checked?null:'none').style('pointer-events','none');
   legend(mx,cs); table(); fillClosing();
 }
 function legend(mx,cs){
   const L=document.getElementById('legend');
   if(GRID!=='none'){L.innerHTML=`<b>${LV==='mat'?'Élèves de maternelle':'Élèves d\'élémentaire'} estimés par carreau de ${GRID}${NB}m</b><br><span class="muted">En filigrane : contours des pâtés de maisons.</span><br>`+[0,0.25,0.5,0.75,1].map(t=>`<span class="sw" style="background:${cs(t*mx)}"></span>${fmt1(t*mx)}`).join(' ');return;}
-  L.innerHTML=`<b>${VIEW==='r26'?'Secteurs actuels (2026-2027)':VIEW==='r27'?'Secteurs 2027 reconstitués':'Scénario alternatif'}</b><br><span class="muted">Contour pointillé : îlot qui change d'école. Chiffre sur une flèche : élèves annoncés par la mairie. Cercle vide : école qui ferme.</span>`;
+  L.innerHTML=`<b>${VIEW==='r26'?'Secteurs actuels (2026-2027)':VIEW==='r27'?'Secteurs 2027 reconstitués':'Scénario alternatif'}</b><br><span class="muted">Contour pointillé : îlot qui change d'école. ${VIEW==='scen'?'Flèches rouges : élèves estimés qui changent d\'école par rapport à aujourd\'hui, recalculés à chaque modification.':'Chiffre sur une flèche : élèves annoncés par la mairie.'} Cercle vide : école qui ferme.</span>`;
 }
 
 let MODE='sel', lasso=[], lassoGeo=null;
@@ -433,7 +444,7 @@ function segSet(id,v){document.querySelectorAll('#'+id+' button').forEach(b=>b.s
 function seg(id,fn){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{segSet(id,b.dataset.v);fn(b.dataset.v);});}
 seg('lv',v=>{LV=v;selected=null;fillBrush();fillClosing(); if(GRP!=='AB'){ fit(); }document.getElementById('sel').innerHTML='Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Scénario alternatif ».';draw();});
 seg('view',v=>{VIEW=v;draw();}); seg('grp',v=>{GRP=v; fit();}); seg('grid',v=>{GRID=v;draw();});
-['cFlux','cMoved','cLab'].forEach(i=>document.getElementById(i).onchange=draw);
+['cFlux','cMoved','cLab','cEff'].forEach(i=>document.getElementById(i).onchange=draw);
 document.getElementById('reset').onclick=()=>{scen[LV]={};save();draw();if(selected){const d=DATA[LV].atoms.features.find(a=>a.properties.atom===selected); if(d) showSel(d);}};
 document.getElementById('copy').onclick=async()=>{
   const fc={type:'FeatureCollection',features:DATA[LV].atoms.features.map(a=>({type:'Feature',geometry:a.geometry,properties:{...a.properties,scenario:scen[LV][a.properties.atom]||a.properties.s27}}))};
