@@ -133,9 +133,9 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
     </div>
     <div class="card">
       <h2>Modifier le scénario</h2>
-      <div class="row" style="justify-content:space-between"><div class="seg" id="mode"><button aria-pressed="true" data-v="brush">Sélection par bloc</button><button aria-pressed="false" data-v="draw">Dessiner un secteur</button></div><div class="row"><button class="btn" id="undoBtn" title="Annuler (Ctrl+Z)" aria-label="Annuler la dernière modification" disabled>↶ Annuler</button><button class="btn" id="redoBtn" title="Rétablir (Ctrl+Maj+Z)" aria-label="Rétablir" disabled>↷</button></div></div>
+      <div class="row" style="justify-content:space-between"><div class="seg" id="mode"><button aria-pressed="true" data-v="brush">Sélection par îlot</button><button aria-pressed="false" data-v="draw">Dessiner un secteur</button></div><div class="row"><button class="btn" id="undoBtn" title="Annuler (Ctrl+Z)" aria-label="Annuler la dernière modification" disabled>↶ Annuler</button><button class="btn" id="redoBtn" title="Rétablir (Ctrl+Maj+Z)" aria-label="Rétablir" disabled>↷</button></div></div>
       <div class="row" style="margin-top:8px"><label for="brushSchool" class="small muted">École à appliquer</label><select id="brushSchool"></select></div>
-      <p class="small muted" id="modeHelp" style="margin:6px 0 0">Choisissez une école ci-dessus, puis cliquez sur chaque pâté de maisons à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche du pâté.</p>
+      <p class="small muted" id="modeHelp" style="margin:6px 0 0">Choisissez une école ci-dessus, puis cliquez sur chaque îlot à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche de l'îlot.</p>
       <div class="row" id="drawBar" style="margin-top:6px;display:none"><button class="btn primary" id="drawApply">Rattacher les îlots tracés</button><button class="btn" id="drawCancel">Effacer le tracé</button><span class="small muted" id="drawInfo"></span></div>
       <h3 class="small" style="margin:12px 0 4px;font-weight:600">Écoles ouvertes</h3><p class="small muted" style="margin:0 0 4px">Cochée&nbsp;: l'école est ouverte. Décochée&nbsp;: elle ferme et ses îlots vont, pour les fermetures prévues par la mairie, vers l'école désignée par le projet, sinon vers l'école ouverte la plus proche.</p>
       <div class="closing-list" id="closing"></div>
@@ -475,7 +475,7 @@ function fillClosing(){
         let dest=(S[n].ferme&&p.s26===n&&!closed.has(p.s27))?p.s27:nearestOpen(a,closed); assign(p,dest); }); }
     save(); draw();});
 }
-const HELP={brush:'Choisissez une école ci-dessus, puis cliquez sur chaque pâté de maisons à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche du pâté.',draw:'Choisissez une école, maintenez le bouton enfoncé et tracez un contour à main levée, puis rattachez les îlots qu\'il contient.'};
+const HELP={brush:'Choisissez une école ci-dessus, puis cliquez sur chaque îlot à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche de l'îlot.',draw:'Choisissez une école, maintenez le bouton enfoncé et tracez un contour à main levée, puis rattachez les îlots qu\'il contient.'};
 function setMode(v){ MODE=v; document.getElementById('modeHelp').textContent=HELP[v]; document.getElementById('drawBar').style.display=v==='draw'?'flex':'none';
   svg.classed('drawing',v==='draw'); if(v==='draw'){ svg.on('.zoom',null); } else { svg.call(zoom); lasso=[]; lassoGeo=null; drawLasso(); } }
 function toGeo(ev){ const [x,y]=d3.pointer(ev,svg.node()); const t=d3.zoomTransform(svg.node()); return proj.invert(t.invert([x,y])); }
