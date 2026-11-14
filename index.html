@@ -31,6 +31,7 @@ section.tab.on{display:block}
 #tblcard{grid-column:1 / -1}
 svg#map.drawing{cursor:crosshair}
 .closing-list label{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 0}
+.closing-list label.closed{color:var(--danger)}
 @media (max-width:980px){ #t-carte.on{grid-template-columns:1fr;grid-template-rows:auto} #mapwrap{height:70vh} }
 #mapwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
 svg#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
@@ -382,10 +383,10 @@ function draw(){
   const occCol=o=>o>1?'#c0262d':(o>=0.85?'#e39a2d':'#3d9a5b');
   sg.select('circle.bg').attr('r',RR).attr('fill',d=>d.closed?'var(--panel)':(d.occ>1?'#c0262d':'var(--panel)')).attr('stroke','none');
   sg.select('path.pie').attr('d',d=>d.closed||d.occ==null||d.occ>1?null:arc({startAngle:0,endAngle:2*Math.PI*Math.min(d.occ,1)})).attr('fill',d=>occCol(d.occ||0));
-  sg.select('circle.ring').attr('r',RR).attr('fill',d=>d.occ==null&&!d.closed?col(d.n):'none').attr('stroke',d=>d.closed?'var(--warn)':(d.occ>1?'#7a1015':'var(--ink)')).attr('stroke-width',1.4);
+  sg.select('circle.ring').attr('r',RR).attr('fill',d=>d.occ==null&&!d.closed?col(d.n):'none').attr('stroke',d=>d.closed?'#c0262d':(d.occ>1?'#7a1015':'var(--ink)')).attr('stroke-width',1.4);
   sg.select('text.warn').text(d=>!d.closed&&d.occ>1?'!':'').attr('text-anchor','middle').attr('dy','0.36em').attr('font-size',11).attr('font-weight',800).attr('fill','#fff').style('pointer-events','none');
   sg.select('text.lbl').attr('x',RR+3).attr('y',-RR+1).text(d=>d.n+(d.closed?' (fermeture)':'')+(document.getElementById('cEff').checked&&!d.closed?` · ≈${fmt(d.tot)}`+(d.occ!=null?` (${Math.round(d.occ*100)}${NB}%)`:''):''))
-    .attr('font-size',11).attr('font-weight',600).attr('fill',d=>!d.closed&&d.occ>1?'#c0262d':'var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3).attr('paint-order','stroke').style('display',document.getElementById('cLab').checked?null:'none').style('pointer-events','none');
+    .attr('font-size',11).attr('font-weight',600).attr('fill',d=>d.closed||d.occ>1?'#c0262d':'var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3).attr('paint-order','stroke').style('display',document.getElementById('cLab').checked?null:'none').style('pointer-events','none');
   legend(mx,cs); table(); fillClosing();
 }
 function legend(mx,cs){
@@ -402,7 +403,7 @@ function fillBrush(){ const s=document.getElementById('brushSchool'); const cur=
 function fillClosing(){
   const S=DATA[LV].schools; const cl=Object.keys(S).filter(n=>S[n].ferme&&inGrp(n)).sort();
   document.getElementById('closing').innerHTML=cl.map((n,i)=>{const own=DATA[LV].atoms.features.filter(a=>baseOf(a.properties)===n); const open=own.some(a=>(scen[LV][a.properties.atom]||n)===n);
-    return `<label><input type="checkbox" id="keep${i}" data-n="${n}" ${open?'checked':''}> ${n}</label>`}).join('')||'<span class="small muted">Aucune fermeture prévue à ce niveau.</span>';
+    return `<label${open?'':' class="closed"'}><input type="checkbox" id="keep${i}" data-n="${n}" ${open?'checked':''}> ${n}${open?'':' <b>· fermée</b>'}</label>`}).join('')||'<span class="small muted">Aucune fermeture prévue à ce niveau.</span>';
   document.querySelectorAll('#closing input').forEach(c=>c.onchange=()=>{const n=c.dataset.n;
     DATA[LV].atoms.features.filter(a=>baseOf(a.properties)===n).forEach(a=>{ if(c.checked) delete scen[LV][a.properties.atom]; else if(a.properties.s27!==n) scen[LV][a.properties.atom]=a.properties.s27; });
     save(); if(VIEW!=='scen'){VIEW='scen'; segSet('view','scen');} draw();});
@@ -434,7 +435,7 @@ function table(){
   names.forEach(n=>{const s=S[n]; const v=tsc[n]||0; const H=X.hist[LV+'|'+n]||{};
     const cap=H.poly?s.clmax:Math.max(s.clmax||0,H.hmax||0)||null;
     const ec=cap&&v?v/cap:null;
-    const pill=s.ferme&&v<1?'<span class="pill close">fermée</span>':(ec>=25?'<span class="pill full">'+fmt1(ec)+'</span>':(ec?fmt1(ec):'–'));
+    const pill=s.ferme&&v<1?'<span class="pill full">fermée</span>':(ec>=25?'<span class="pill full">'+fmt1(ec)+'</span>':(ec?fmt1(ec):'–'));
     const site=siteOf(n); let cour='–', ratio='–';
     if(site&&site.non_bati!=null){ cour=fmt(site.non_bati)+(site.avec_dalle>site.non_bati?` · ${fmt(site.avec_dalle)}`:'');
       const el=d3.sum(site.members.filter((m,i,a)=>a.findIndex(x=>x[0]===m[0]&&x[1]===m[1])===i),m=>other[m[0]][m[1]]||0);
@@ -442,7 +443,7 @@ function table(){
       if(site.members.length>1){ const oth=site.members.filter(m=>m[1]!==n).map(m=>m[1]+(m[0]==='mat'?' (mat.)':' (élém.)')); if(oth.length) cour+=`<br><span class="muted small">site partagé avec ${[...new Set(oth)].join(', ')}</span>`; }
     } else if(site&&site.note){ cour=`<span class="muted small">${site.note}</span>`; }
     const hm=H.hmax!=null?`${H.hmax}${H.poly?' (total)':''} <span class="muted small">en ${H.hyear}</span>`:'–';
-    h+=`<tr><td style="white-space:nowrap"><span class="sw" style="background:${col(n)}"></span>${n}</td><td>${fmt(t26[n])}</td><td>${fmt(t27[n])}</td><td><b>${fmt(v)}</b></td><td>${fmt(s.nv)}</td><td>${s.clmax??'–'}</td><td>${hm}</td><td>${cap??'–'}${cap&&s.cap&&s.clmax?`<br><span class="muted small">${fmt(cap*s.cap/s.clmax)}${NB}élèves</span>`:''}</td><td>${(()=>{ if(!(cap&&s.cap&&s.clmax)||(s.ferme&&v<1)) return '–'; const o=v/(cap*s.cap/s.clmax); const p=Math.round(o*100)+NB+'%'; return o>1?`<span class="pill full">! ${p}</span>`:(o>=0.85?`<b>${p}</b>`:p); })()}</td><td>${pill}</td><td>${cour}</td><td>${ratio}</td></tr>`});
+    h+=`<tr><td style="white-space:nowrap"><span class="sw" style="background:${col(n)}"></span>${n}</td><td>${fmt(t26[n])}</td><td>${fmt(t27[n])}</td><td><b>${fmt(v)}</b></td><td>${fmt(s.nv)}</td><td>${s.clmax??'–'}</td><td>${hm}</td><td>${cap??'–'}${cap&&s.cap&&s.clmax?`<br><span class="muted small">${fmt(cap*s.cap/s.clmax)}${NB}élèves</span>`:''}</td><td>${(()=>{ if(!(cap&&s.cap&&s.clmax)||(s.ferme&&v<1)) return s.ferme&&v<1?'<span class="pill full">fermée</span>':'–'; const o=v/(cap*s.cap/s.clmax); const p=Math.round(o*100)+NB+'%'; return o>1?`<span class="pill full">! ${p}</span>`:(o>=0.85?`<b>${p}</b>`:p); })()}</td><td>${pill}</td><td>${cour}</td><td>${ratio}</td></tr>`});
   document.getElementById('tbl').innerHTML=h+'</tbody>';
   const nChg=Object.keys(scen[LV]).length;
   document.getElementById('status').textContent=nChg?`${nChg} îlot(s) rattaché(s) à une autre école que celle d'aujourd'hui (${LV==='mat'?'maternelle':'élémentaire'}).`:'Scénario alternatif identique à la situation actuelle : toutes les écoles sont ouvertes.';
