@@ -400,13 +400,18 @@ const gLasso=g.append('g');
 function assign(p,v){ if(v===baseOf(p)) delete scen[LV][p.atom]; else scen[LV][p.atom]=v; save(); if(VIEW!=='scen'){VIEW='scen'; segSet('view','scen');} }
 function schoolList(){ return Object.keys(DATA[LV].schools).sort(); }
 function fillBrush(){ const s=document.getElementById('brushSchool'); const cur=s.value; s.innerHTML=schoolList().map(n=>`<option${n===cur?' selected':''}>${n}</option>`).join(''); }
+function mairieInto(lv){ scen[lv]={}; DATA[lv].atoms.features.forEach(a=>{ if(a.properties.s27!==baseOf(a.properties)) scen[lv][a.properties.atom]=a.properties.s27; }); }
+function isOpen(n){ const own=DATA[LV].atoms.features.filter(a=>baseOf(a.properties)===n);
+  if(VIEW==='r26') return true; if(VIEW==='r27') return false;
+  return own.some(a=>(scen[LV][a.properties.atom]||n)===n); }
 function fillClosing(){
   const S=DATA[LV].schools; const cl=Object.keys(S).filter(n=>S[n].ferme&&inGrp(n)).sort();
-  document.getElementById('closing').innerHTML=cl.map((n,i)=>{const own=DATA[LV].atoms.features.filter(a=>baseOf(a.properties)===n); const open=own.some(a=>(scen[LV][a.properties.atom]||n)===n);
+  document.getElementById('closing').innerHTML=cl.map((n,i)=>{const open=isOpen(n);
     return `<label${open?'':' class="closed"'}><input type="checkbox" id="keep${i}" data-n="${n}" ${open?'checked':''}> ${n}${open?'':' <b>· fermée</b>'}</label>`}).join('')||'<span class="small muted">Aucune fermeture prévue à ce niveau.</span>';
   document.querySelectorAll('#closing input').forEach(c=>c.onchange=()=>{const n=c.dataset.n;
+    if(VIEW==='r27'){ mairieInto('mat'); mairieInto('elem'); } else if(VIEW==='r26'){ scen={mat:{},elem:{}}; }
     DATA[LV].atoms.features.filter(a=>baseOf(a.properties)===n).forEach(a=>{ if(c.checked) delete scen[LV][a.properties.atom]; else if(a.properties.s27!==n) scen[LV][a.properties.atom]=a.properties.s27; });
-    save(); if(VIEW!=='scen'){VIEW='scen'; segSet('view','scen');} draw();});
+    save(); VIEW='scen'; segSet('view','scen'); draw();});
 }
 const HELP={sel:'Cliquez sur un pâté de maisons pour voir son estimation et choisir son école.',brush:'Chaque clic sur un pâté de maisons le rattache à l\'école choisie ci-dessus.',draw:'Maintenez le bouton enfoncé et tracez un contour à main levée, puis rattachez les îlots qu\'il contient à l\'école choisie.'};
 function setMode(v){ MODE=v; document.getElementById('modeHelp').textContent=HELP[v]; document.getElementById('drawBar').style.display=v==='draw'?'flex':'none';
@@ -461,8 +466,8 @@ function seg(id,fn){document.querySelectorAll('#'+id+' button').forEach(b=>b.onc
 seg('lv',v=>{LV=v;selected=null;fillBrush();fillClosing(); if(GRP!=='AB'){ fit(); }document.getElementById('sel').innerHTML='Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Scénario alternatif ».';draw();});
 seg('view',v=>{VIEW=v;draw();}); seg('grp',v=>{GRP=v; fit();}); seg('grid',v=>{GRID=v;draw();});
 ['cFlux','cMoved','cLab','cEff'].forEach(i=>document.getElementById(i).onchange=draw);
-document.getElementById('loadMairie').onclick=()=>{ scen[LV]={}; DATA[LV].atoms.features.forEach(a=>{ if(a.properties.s27!==baseOf(a.properties)) scen[LV][a.properties.atom]=a.properties.s27; }); save(); VIEW='scen'; segSet('view','scen'); draw(); };
-document.getElementById('reset').onclick=()=>{scen[LV]={};save();draw();if(selected){const d=DATA[LV].atoms.features.find(a=>a.properties.atom===selected); if(d) showSel(d);}};
+document.getElementById('loadMairie').onclick=()=>{ mairieInto('mat'); mairieInto('elem'); save(); VIEW='scen'; segSet('view','scen'); draw(); };
+document.getElementById('reset').onclick=()=>{scen={mat:{},elem:{}};save();VIEW='scen';segSet('view','scen');draw();if(selected){const d=DATA[LV].atoms.features.find(a=>a.properties.atom===selected); if(d) showSel(d);}};
 document.getElementById('copy').onclick=async()=>{
   const fc={type:'FeatureCollection',features:DATA[LV].atoms.features.map(a=>({type:'Feature',geometry:a.geometry,properties:{...a.properties,scenario:scen[LV][a.properties.atom]||a.properties.s27}}))};
   try{await navigator.clipboard.writeText(JSON.stringify(fc)); document.getElementById('status').textContent='GeoJSON du scénario copié : collez-le dans un fichier .geojson (QGIS, geojson.io).';}
