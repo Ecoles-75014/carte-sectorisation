@@ -95,7 +95,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
     <div class="card">
       <div class="row" style="justify-content:space-between">
         <div class="seg" id="lv"><button aria-pressed="true" data-v="mat">Maternelle</button><button aria-pressed="false" data-v="elem">Élémentaire</button></div>
-        <div class="seg" id="view"><button aria-pressed="false" data-v="r26">Actuel</button><button aria-pressed="false" data-v="r27">2027 mairie</button><button aria-pressed="true" data-v="scen">Mon scénario</button></div>
+        <div class="seg" id="view"><button aria-pressed="false" data-v="r26">Actuel</button><button aria-pressed="false" data-v="r27">2027 mairie</button><button aria-pressed="true" data-v="scen">Scénario alternatif</button></div>
       </div>
       <div class="row" style="margin-top:8px">
         <span class="small muted">Secteur&nbsp;:</span>
@@ -122,13 +122,13 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
     </div>
     <div class="card" id="edit">
       <h2>Îlot sélectionné</h2>
-      <div id="sel" class="small muted">Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Mon scénario ».</div>
+      <div id="sel" class="small muted">Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Scénario alternatif ».</div>
     </div>
   </div>
     <div class="card" id="tblcard">
       <div class="row" style="justify-content:space-between;margin-bottom:6px">
         <h2 style="margin:0">Effectifs par école</h2>
-        <div class="row"><button class="btn" id="reset">Revenir au projet mairie</button><button class="btn primary" id="copy">Copier le GeoJSON</button></div>
+        <div class="row"><button class="btn" id="reset">Revenir au projet mairie</button><button class="btn primary" id="exportScen">Exporter le scénario</button><label class="btn" for="importScen" style="cursor:pointer">Importer un scénario</label><input type="file" id="importScen" accept=".json,.geojson,application/json" style="position:absolute;width:1px;height:1px;opacity:0"><button class="btn" id="copy">Copier le GeoJSON</button></div>
       </div>
       <div class="status" id="status"></div>
       <div class="wide"><table id="tbl"></table></div>
@@ -226,7 +226,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <li>Les données INSEE datent de 2019, avant la baisse récente (−22&nbsp;% d'élèves dans le 14e depuis 2014 selon la mairie). Les valeurs absolues tiennent donc au calage, et la répartition dans l'espace à l'INSEE.</li>
 <li>Les limites 2027 sont lues sur des cartes JPEG à faible résolution, avec une précision d'environ 5 à 10&nbsp;m. Les petites zones (une parcelle, une bande le long d'une rue) peuvent être mal placées&nbsp;: les écarts signalés dans l'onglet Flux sont à vérifier sur les cartes détaillées.</li>
 <li>Les carreaux de 200&nbsp;m qui débordent du 14e comptent aussi la population voisine (colonne « part dans le 14e » dans le fichier).</li>
-<li>Les modifications de « Mon scénario » restent dans votre navigateur. Le bouton « Copier le GeoJSON » permet de les récupérer.</li>
+<li>Les modifications de « Scénario alternatif » restent dans votre navigateur. Le bouton « Copier le GeoJSON » permet de les récupérer.</li>
 </ul>
 </section>
 <section class="tab prose" id="t-sources" style="max-width:1100px"><h2>Sources</h2>
@@ -365,7 +365,7 @@ function draw(){
 function legend(mx,cs){
   const L=document.getElementById('legend');
   if(GRID!=='none'){L.innerHTML=`<b>${LV==='mat'?'Élèves de maternelle':'Élèves d\'élémentaire'} estimés par carreau de ${GRID}${NB}m</b><br><span class="muted">En filigrane : contours des pâtés de maisons.</span><br>`+[0,0.25,0.5,0.75,1].map(t=>`<span class="sw" style="background:${cs(t*mx)}"></span>${fmt1(t*mx)}`).join(' ');return;}
-  L.innerHTML=`<b>${VIEW==='r26'?'Secteurs actuels (2026-2027)':VIEW==='r27'?'Secteurs 2027 reconstitués':'Mon scénario'}</b><br><span class="muted">Contour pointillé : îlot qui change d'école. Chiffre sur une flèche : élèves annoncés par la mairie. Cercle vide : école qui ferme.</span>`;
+  L.innerHTML=`<b>${VIEW==='r26'?'Secteurs actuels (2026-2027)':VIEW==='r27'?'Secteurs 2027 reconstitués':'Scénario alternatif'}</b><br><span class="muted">Contour pointillé : îlot qui change d'école. Chiffre sur une flèche : élèves annoncés par la mairie. Cercle vide : école qui ferme.</span>`;
 }
 
 let MODE='sel', lasso=[], lassoGeo=null;
@@ -403,7 +403,7 @@ function table(){
   const other={mat:totals(VIEW==='r26'?'r26':(VIEW==='r27'?'r27':'scen'),'mat'),elem:totals(VIEW==='r26'?'r26':(VIEW==='r27'?'r27':'scen'),'elem')};
   const siteOf=n=>X.sites.find(s=>s.members.some(m=>m[0]===LV&&m[1]===n));
   const names=Object.keys(S).filter(n=>inGrp(n)&&(t26[n]||t27[n]||tsc[n]||S[n].nv)).sort((a,b)=>(tsc[b]||0)-(tsc[a]||0));
-  const lab=VIEW==='r26'?'Actuel':(VIEW==='r27'?'2027 mairie':'Mon scénario');
+  const lab=VIEW==='r26'?'Actuel':(VIEW==='r27'?'2027 mairie':'Scénario alternatif');
   let h=`<thead><tr><th>École</th><th>Élèves estimés<br>actuel</th><th>Élèves estimés<br>2027 mairie</th><th>Élèves estimés<br>${lab}</th><th>Mairie<br>Nv secteur</th><th>Classes max<br>mairie</th><th>Max classes<br>2009-2025</th><th>Capacité<br>retenue</th><th>Élèves / classe<br>(${lab})</th><th>Cour (m²)<br>non bâti · avec dalles</th><th>Cour m² / élève<br>(${lab})</th></tr></thead><tbody>`;
   names.forEach(n=>{const s=S[n]; const v=tsc[n]||0; const H=X.hist[LV+'|'+n]||{};
     const cap=H.poly?s.clmax:Math.max(s.clmax||0,H.hmax||0)||null;
@@ -425,13 +425,13 @@ function showSel(d){
   const p=d.properties, S=DATA[LV].schools;
   const opts=Object.keys(S).sort().map(n=>`<option ${n===(scen[LV][p.atom]||p.s27)?'selected':''}>${n}</option>`).join('');
   document.getElementById('sel').innerHTML=`<table><tr><td>École actuelle</td><td>${p.s26}</td></tr><tr><td>École 2027 (mairie)</td><td>${p.s27}</td></tr><tr><td>Élèves estimés</td><td>${fmt1(p.est)}</td></tr><tr><td>Enfants INSEE 2019</td><td>${fmt1(p.insee)}</td></tr><tr><td>Logements (BD TOPO)</td><td>${fmt(p.logements)}</td></tr></table>
-  <div class="row" style="margin-top:8px"><label for="assign" class="small">Rattacher dans « Mon scénario » à</label><select id="assign">${opts}</select></div><div style="margin-top:8px"><button class="btn" id="sigAtom">Signaler une erreur sur cet îlot</button></div>`;
+  <div class="row" style="margin-top:8px"><label for="assign" class="small">Rattacher dans « Scénario alternatif » à</label><select id="assign">${opts}</select></div><div style="margin-top:8px"><button class="btn" id="sigAtom">Signaler une erreur sur cet îlot</button></div>`;
   document.getElementById('sigAtom').onclick=()=>signalAtom(p);
   document.getElementById('assign').onchange=e=>{assign(p,e.target.value); draw();};
 }
 function segSet(id,v){document.querySelectorAll('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));}
 function seg(id,fn){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{segSet(id,b.dataset.v);fn(b.dataset.v);});}
-seg('lv',v=>{LV=v;selected=null;fillBrush();fillClosing(); if(GRP!=='AB'){ fit(); }document.getElementById('sel').innerHTML='Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Mon scénario ».';draw();});
+seg('lv',v=>{LV=v;selected=null;fillBrush();fillClosing(); if(GRP!=='AB'){ fit(); }document.getElementById('sel').innerHTML='Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Scénario alternatif ».';draw();});
 seg('view',v=>{VIEW=v;draw();}); seg('grp',v=>{GRP=v; fit();}); seg('grid',v=>{GRID=v;draw();});
 ['cFlux','cMoved','cLab'].forEach(i=>document.getElementById(i).onchange=draw);
 document.getElementById('reset').onclick=()=>{scen[LV]={};save();draw();if(selected){const d=DATA[LV].atoms.features.find(a=>a.properties.atom===selected); if(d) showSel(d);}};
@@ -475,6 +475,31 @@ function signalAtom(p){ document.getElementById('sigType').value='Limite de sect
   document.getElementById('sigWhere').value=`îlot ${p.atom} (actuel : ${p.s26} ; 2027 mairie : ${p.s27})`; sigUpdate();
   document.querySelector('nav button[data-t="signal"]').click(); document.getElementById('sigText').focus(); }
 sigUpdate();
+
+// export / import du scénario alternatif
+function scenFile(){ return {format:'secto14-scenario',version:1,cree_le:new Date().toISOString(),
+  description:'Scénario alternatif de sectorisation du 14e : îlots rattachés à une autre école que dans le projet de la mairie.',
+  mat:scen.mat, elem:scen.elem}; }
+document.getElementById('exportScen').onclick=async()=>{
+  const txt=JSON.stringify(scenFile(),null,1); const st=document.getElementById('status');
+  try{ const url=URL.createObjectURL(new Blob([txt],{type:'application/json'})); const a=document.createElement('a'); a.href=url; a.download='scenario-sectorisation-14e.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);}catch(e){}
+  let copied=false; if(window.self!==window.top){ try{ await navigator.clipboard.writeText(txt); copied=true; }catch(e){} }
+  st.textContent=copied?'Fichier proposé au téléchargement. Si rien ne se télécharge dans cet aperçu, le scénario a aussi été copié : collez-le dans un fichier .json.':'Fichier « scenario-sectorisation-14e.json » téléchargé.';
+};
+document.getElementById('importScen').onchange=async e=>{
+  const f=e.target.files[0]; const st=document.getElementById('status'); if(!f) return;
+  try{
+    const j=JSON.parse(await f.text()); let next={mat:{},elem:{}}; let ok=0, bad=0;
+    const add=(lv,atom,school)=>{ const a=DATA[lv].atoms.features.find(x=>x.properties.atom===atom); if(a&&DATA[lv].schools[school]){ if(school!==a.properties.s27){ next[lv][atom]=school; } ok++; } else bad++; };
+    if(j.format==='secto14-scenario'){ ['mat','elem'].forEach(lv=>Object.entries(j[lv]||{}).forEach(([k,v])=>add(lv,k,v))); }
+    else if(j.type==='FeatureCollection'){ (j.features||[]).forEach(ft=>{ const p=ft.properties||{}; const lv=String(p.atom||'').startsWith('m')?'mat':'elem'; if(p.atom&&p.scenario) add(lv,p.atom,p.scenario); }); }
+    else throw new Error('format');
+    if(j.type==='FeatureCollection'){ const lvs=new Set((j.features||[]).map(ft=>String(ft.properties&&ft.properties.atom||'').startsWith('m')?'mat':'elem')); ['mat','elem'].forEach(lv=>{ if(!lvs.has(lv)) next[lv]=scen[lv]; }); }
+    scen=next; save(); VIEW='scen'; segSet('view','scen'); draw();
+    st.textContent=`Scénario importé : ${Object.keys(scen.mat).length} îlot(s) modifié(s) en maternelle, ${Object.keys(scen.elem).length} en élémentaire`+(bad?` ; ${bad} ligne(s) ignorée(s), îlot ou école inconnus.`:'.');
+  }catch(err){ st.textContent='Ce fichier n\'est pas un scénario reconnu. Utilisez un fichier exporté depuis cette carte (.json) ou un GeoJSON copié depuis la carte.'; }
+  e.target.value='';
+};
 
 fillBrush(); fillClosing(); fit();
 </script>
