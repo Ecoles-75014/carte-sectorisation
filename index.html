@@ -33,7 +33,7 @@ svg#map.drawing{cursor:crosshair}
 .closing-list label{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 0}
 @media (max-width:980px){ #t-carte.on{grid-template-columns:1fr;grid-template-rows:auto} #mapwrap{height:70vh} }
 #mapwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-svg#map{width:100%;height:100%;display:block;cursor:grab}
+svg#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
 .side{display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
 .card h2{font:600 15px var(--display);margin:0 0 8px}
@@ -80,6 +80,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
   <button role="tab" aria-selected="false" data-t="flux">Flux : mairie / estimation</button>
   <button role="tab" aria-selected="false" data-t="rp">Rouvier et Pinard</button>
   <button role="tab" aria-selected="false" data-t="methode">Méthode et limites</button>
+  <button role="tab" aria-selected="false" data-t="signal">Signaler une erreur</button>
 </nav>
 
 <section class="tab on" id="t-carte">
@@ -147,17 +148,17 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <li>Chaque solde des diapositives de flux se retrouve à partir des flèches. Par exemple, pour Alésia (3&nbsp;B) en maternelle&nbsp;: +56 − 23 − 29 = +4&nbsp;; pour Alésia (3) en élémentaire&nbsp;: +104 − 43 − 54 = +7&nbsp;; pour Maurice Rouvier en maternelle&nbsp;: +36 − 37 − 9 = −10.</li>
 </ul>
 <h3>Points à faire préciser par la mairie</h3>
-<div class="flag"><b>Base des élèves déplacés.</b> Les flèches comptent des élèves domiciliés, et non des inscrits. Pour Sibelle, les deux chiffres sont proches (77 déplacés pour 75&nbsp;inscrits en maternelle, 147 pour 146 en élémentaire). Pour d'autres écoles, l'écart est net&nbsp;: Alésia (190), 115 déplacés pour 93&nbsp;inscrits&nbsp;; Alésia (188), 193 pour 169&nbsp;; Sarrette (55), 135 pour 104. Il faudrait savoir à quelle année et à quel périmètre ces chiffres se rapportent, et s'ils incluent des logements à venir (la diapositive Sarrette mentionne «&nbsp;169&nbsp;LS&nbsp;» pour la cour des Ateliers).</div>
-<div class="flag"><b>« Plein effet » et baisse démographique.</b> Le nouveau secteur additionne l'estimation 2027 et la totalité des élèves déplacés, alors que le plein effet n'est atteint qu'au bout de 3&nbsp;ans en maternelle et de 5&nbsp;ans en élémentaire, période pendant laquelle les projections de la mairie prévoient une baisse de 16 à 21&nbsp;%. On ne sait pas si les flux ont été calculés sur les cohortes projetées ou sur la population actuelle.</div>
+<div class="flag"><b>Base des élèves déplacés.</b> Les flèches comptent des élèves domiciliés, et non des inscrits. Pour Sibelle, les deux chiffres sont proches (77 déplacés pour 75&nbsp;inscrits en maternelle, 147 pour 146 en élémentaire). Pour d'autres écoles, l'écart est net&nbsp;: Alésia (190), 115 déplacés pour 93&nbsp;inscrits&nbsp;; Alésia (188), 193 pour 169&nbsp;; Sarrette (55), 135 pour 104. Selon les échanges avec la mairie, ces chiffres sont des projections de ses services, dont la source et la méthode n'ont pas été communiquées à ce jour. La diapositive Sarrette mentionne par ailleurs «&nbsp;169&nbsp;LS&nbsp;» pour la cour des Ateliers, ce qui laisse penser que des logements à venir sont inclus.</div>
+<div class="flag"><b>« Plein effet » et baisse démographique.</b> Le nouveau secteur additionne l'estimation 2027 et la totalité des élèves déplacés, alors que le plein effet n'est atteint qu'au bout de 3&nbsp;ans en maternelle et de 5&nbsp;ans en élémentaire, période pendant laquelle les projections de la mairie prévoient une baisse de 16 à 21&nbsp;%. D'après les premiers échanges, la baisse serait a priori prise en compte, ce qui reste à confirmer par écrit.</div>
 <div class="flag"><b>Peu de marge dans les écoles d'accueil.</b> Après les mouvements, 14 des 3014&nbsp;écoles d'accueil sur 30 atteignentnbsp;écoles des tableaux de synthèse atteignent le nombre de classes équivalentes égal à leur capacité maximale. En maternelle, ce sont Sarrette (34) 9/9, Jean Dolent 6/6, Hippolyte Maindron 7/7, Maurice d'Ocagne 9/9, Maurice Rouvier 7/7, Chantin (22) 7/7 et Ouest (13) 5/5. En élémentaire, ce sont Arago 11/11, Alain Fournier 10/10, Asseline 8/8, Delambre 9/9, Maurice Rouvier 12/12, Pierre Larousse 10/10 et Chantin (20) 13/13. Les ratios les plus élevés sont ceux de Tombe-Issoire en maternelle (24,9) ainsi que de Ripoche et Chantin (20) (24,5). Pour rappel, les ouvertures et fermetures de classes relèvent de l'Éducation nationale.</div>
-<div class="flag"><b>Capacités de la mairie et classes effectivement ouvertes depuis 2009.</b> Les chiffres de l'Éducation nationale montrent que plusieurs écoles ont déjà compté plus de classes que la capacité indiquée par la mairie&nbsp;: Jean Dolent 7 pour 6, Boulard élémentaire 15 pour 12, Pierre Larousse 12 pour 10, Sarrette (55) 7 pour 5, Asseline 9 pour 8, Chantin (20) 14 pour 13 et Maurice Rouvier élémentaire 13 pour 12. À l'inverse, Sarrette (34) n'a jamais dépassé 7&nbsp;classes depuis 2009 alors que le projet lui en attribue 9, et Alésia (12) a culminé à 18&nbsp;classes pour une capacité affichée de 21. Il faudrait savoir si ces capacités supposent des travaux ou la reprise de salles affectées au périscolaire.</div>
+<div class="flag"><b>Capacités de la mairie et classes effectivement ouvertes depuis 2009.</b> Les chiffres de l'Éducation nationale montrent que plusieurs écoles ont déjà compté plus de classes que la capacité indiquée par la mairie&nbsp;: Jean Dolent 7 pour 6, Boulard élémentaire 15 pour 12, Pierre Larousse 12 pour 10, Sarrette (55) 7 pour 5, Asseline 9 pour 8, Chantin (20) 14 pour 13 et Maurice Rouvier élémentaire 13 pour 12. À l'inverse, Sarrette (34) n'a jamais dépassé 7&nbsp;classes depuis 2009 alors que le projet lui en attribue 9, et Alésia (12) a culminé à 18&nbsp;classes pour une capacité affichée de 21. Ces capacités résultent d'un décompte fait par la mairie, dont le détail par école (salles comptées, salles affectées au périscolaire) n'a pas été publié.</div>
 <div class="flag"><b>Cours de récréation.</b> La surface non bâtie du 34 rue Sarrette, estimée à partir des données de l'Apur, est d'environ 977&nbsp;m². Elle passerait de 6,9&nbsp;m² par élève (141&nbsp;élèves en 2025) à 4,8&nbsp;m² avec les 203&nbsp;élèves prévus par la mairie. Le tableau sous la carte donne ce ratio pour chaque école et chaque scénario. Ces surfaces restent des estimations, à confirmer par la Ville (DASCO).</div>
 <div class="flag"><b>L'école Pinard n'apparaît dans aucun tableau de synthèse</b>, alors qu'elle ouvre à la rentrée 2027 avec 8&nbsp;classes et qu'une partie des élèves de la ZAC devra être répartie vers Delambre, Boulard, Jean Dolent et Arago, dont plusieurs sont déjà à leur capacité maximale.</div>
 </section>
 <section class="tab prose" id="t-flux"><div id="fluxbox"></div></section>
 <section class="tab prose" id="t-rp">
 <h2>Travaux de l'école Maurice Rouvier et ouverture de Pinard</h2>
-<p>Les travaux de Rouvier commencent en 2028, comme l'indique la présentation GT1&nbsp;A (p.&nbsp;33 et 43), pour une durée d'un à deux ans. Le relogement des classes s'étend donc des rentrées 2028 à 2029, ou jusqu'en 2030 si le chantier dure deux ans.</p>
+<p>Les travaux de Rouvier commencent en 2028, comme l'indique la présentation GT1&nbsp;A (p.&nbsp;33 et 43). Le retour dans l'école rénovée est prévu à la rentrée 2030, si bien que les classes d'élémentaire seraient relogées pendant deux années scolaires, 2028-2029 et 2029-2030. La mairie prévoit ensuite de fermer le site Alésia une fois Rouvier réintégré (information recueillie lors des échanges, à confirmer par écrit).</p>
 <h3>Ce que dit la présentation (GT1&nbsp;A, p.&nbsp;33 et 43)</h3>
 <ul>
 <li>Le groupe scolaire Rouvier compte 7&nbsp;classes en maternelle et 12 en élémentaire à la rentrée 2026, et doit faire l'objet d'une rénovation complète.</li>
@@ -173,7 +174,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <tr><td>2027</td><td>≈&nbsp;62 (MS-GS)</td><td>≈&nbsp;135 (CE1-CM2)</td><td>≈&nbsp;3 + 6 = 9</td><td>–</td><td>≈&nbsp;9</td></tr>
 <tr><td>2028</td><td>≈&nbsp;34 (GS)</td><td>≈&nbsp;118 (CE2-CM2)</td><td>3 + 5 = 8 (chiffres mairie)</td><td>12</td><td><b>20</b></td></tr>
 <tr><td>2029</td><td>0</td><td>≈&nbsp;70 (CM1-CM2)</td><td>≈&nbsp;3</td><td>12</td><td>≈&nbsp;15</td></tr>
-<tr><td>2030</td><td>0</td><td>≈&nbsp;35 (CM2)</td><td>≈&nbsp;2</td><td>12 si les travaux durent 2&nbsp;ans</td><td>≈&nbsp;14</td></tr>
+<tr><td>2030</td><td>0</td><td>≈&nbsp;35 (CM2)</td><td>≈&nbsp;2</td><td>retour à Rouvier</td><td>≈&nbsp;2, puis fermeture du site</td></tr>
 </tbody></table></div>
 <p class="small muted">La capacité de 19&nbsp;classes est la somme des capacités maximales d'Alésia (190) et (188) (tableaux p.&nbsp;13-14). Les effectifs de 2027, 2029 et 2030 sont estimés par cohorte, en divisant l'effectif 2026 par le nombre de niveaux. Les chiffres de 2028 sont ceux de la mairie.</p>
 <h3>Points à éclaircir</h3>
@@ -181,15 +182,20 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <li><b>Rentrée 2028.</b> Il faudrait loger environ 20&nbsp;classes sur un site qui en compte 19 au maximum, alors que la mairie n'annonce que 12&nbsp;locaux mobilisables. Reste à savoir où vont les 8&nbsp;classes d'Alésia encore présentes, et si des locaux annexes ont été comptés.</li>
 <li><b>Rentrée 2027.</b> Rouvier accueillerait dès 2027 des élèves venus d'Alésia (+36 en maternelle et +60 en élémentaire, pour des soldes de −10 et −15), un an avant d'entrer en travaux. En élémentaire, ces enfants changeraient donc d'école en 2027, puis de site en 2028.</li>
 <li><b>Maternelle de Rouvier en site occupé.</b> Il serait utile de connaître les conditions d'accueil pendant le chantier (cour, sanitaires, dortoirs, accès).</li>
-<li><b>Après les travaux.</b> La présentation ne dit pas ce que devient le site Alésia une fois Rouvier réintégré, en 2029 ou en 2030.</li>
+<li><b>Après les travaux.</b> Si le site Alésia ferme après le retour de Rouvier en 2030, les derniers élèves d'Alésia (188), environ 35&nbsp;CM2 à la rentrée 2030, devraient être accueillis ailleurs ou terminer leur scolarité sur un site presque vide.</li>
 </ul>
-<h3>Ouverture de l'école polyvalente Pinard (ZAC Saint-Vincent-de-Paul, GT1&nbsp;A p.&nbsp;16-17)</h3>
+<h3>Ouverture de l'école polyvalente Pinard (ZAC Saint-Vincent-de-Paul)</h3>
 <ul>
-<li>L'école ouvre à la rentrée 2027 avec 8&nbsp;classes et son secteur se limite à la ZAC. La mairie attend environ 250&nbsp;élèves, soit 10&nbsp;classes au seuil de 25. Deux classes équivalentes devront donc à terme être réparties vers les écoles voisines&nbsp;: Delambre, Boulard/Agnès Varda, Jean Dolent et Arago.</li>
-<li>En 2019, la zone ne compte presque aucun logement familial (environ 2&nbsp;élèves estimés). L'école se remplira donc au rythme des livraisons de logements, dont le calendrier n'est pas donné.</li>
+<li>L'école occupe l'ancienne maternité Pinard, avec une crèche et un gymnase. Le programme d'origine prévoyait un groupe scolaire de 8&nbsp;classes (Paris &amp; Métropole Aménagement, 2019).</li>
+<li>Selon la Ville, environ 600&nbsp;habitants s'installeront dans le quartier au premier trimestre 2027, et l'école et la crèche ouvriront en septembre 2027. Le quartier comptera à terme 600&nbsp;logements, dont 55&nbsp;% de logements sociaux (bail réel solidaire compris), 20&nbsp;% de logements intermédiaires et 25&nbsp;% en accession libre&nbsp;; 300 d'entre eux sont livrés dans une première phase (paris.fr).</li>
+<li>La délibération 2024&nbsp;DU&nbsp;155 du Conseil de Paris prévoit une mise en service en deux temps&nbsp;: le gymnase, la crèche et le tiers-lieu en janvier 2027, puis l'école en septembre 2027, en cohérence avec la livraison des premiers logements des lots Petit et Chaufferie.</li>
+<li>La présentation de la mairie (GT1&nbsp;A p.&nbsp;16-17) attend environ 250&nbsp;élèves à terme, soit 10&nbsp;classes, pour 8&nbsp;classes disponibles. Deux classes équivalentes devraient donc être réparties vers Delambre, Boulard/Agnès Varda, Jean Dolent et Arago.</li>
+<li>Ce chiffre de 250 paraît élevé au regard des ratios observés dans le 14e. En 2019, on y comptait environ 14&nbsp;enfants de 3 à 10&nbsp;ans pour 100&nbsp;ménages, et 18 dans les carreaux où plus de la moitié des logements sont sociaux. Pour 600&nbsp;logements, cela représenterait de l'ordre de 80 à 110&nbsp;enfants de 3 à 10&nbsp;ans, toutes écoles confondues, contre 250&nbsp;élèves attendus par la mairie, soit plus de 40&nbsp;élèves pour 100&nbsp;logements. L'écart peut tenir à la taille des logements familiaux du programme, que la mairie devrait préciser.</li>
 <li>Les écoles désignées pour absorber le surplus sont en partie déjà pleines après le projet. Arago atteint 11&nbsp;classes équivalentes sur 11 avec les élèves venus d'Alésia (3), Jean Dolent 6 sur 6 et Delambre (élémentaire) 9 sur 9. Seules Boulard (élémentaire, 10 sur 12) et Delambre (maternelle, 5 sur 7) gardent de la marge.</li>
-<li>Questions à poser&nbsp;: le calendrier de livraison des logements de la ZAC, la répartition des 8&nbsp;classes entre maternelle et élémentaire, et la prise en compte de Pinard dans les tableaux de synthèse.</li>
+<li>Une question orale sur cette école a été posée au conseil d'arrondissement du 9&nbsp;juin 2026 (Q14&nbsp;2026&nbsp;05&nbsp;: ouverture progressive, classes ULIS, prévisions d'habitants, effets sur Arago et Jean Dolent). La réponse de l'exécutif est publiée sur le site de la mairie du 14e et reste à analyser.</li>
+<li>Questions à poser&nbsp;: la méthode du chiffre de 250&nbsp;élèves (typologie des logements), la répartition des 8&nbsp;classes entre maternelle et élémentaire, l'ouverture progressive ou non dès 2027, et la prise en compte de Pinard dans les tableaux de synthèse.</li>
 </ul>
+<p class="small muted">Sources&nbsp;: paris.fr, «&nbsp;Saint-Vincent-de-Paul, cet ancien hôpital transformé en nouveau quartier&nbsp;»&nbsp;; Conseil de Paris, projet de délibération 2024&nbsp;DU&nbsp;155&nbsp;; Paris &amp; Métropole Aménagement, fiche Saint-Vincent-de-Paul (2019)&nbsp;; mairie du 14e, conseil d'arrondissement du 9&nbsp;juin 2026&nbsp;; INSEE, Filosofi 2019.</p>
 </section>
 <section class="tab prose" id="t-methode">
 <h2>Méthode et limites</h2>
@@ -217,6 +223,26 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <li>Les modifications de « Mon scénario » restent dans votre navigateur. Le bouton « Copier le GeoJSON » permet de les récupérer.</li>
 </ul>
 </section>
+<section class="tab prose" id="t-signal">
+<h2>Signaler une erreur ou proposer une correction</h2>
+<p>Cette carte reconstitue le projet de la mairie à partir de ses présentations et de données publiques. Si un chiffre, une limite de secteur ou une information sur une école vous semble faux, décrivez-le ci-dessous. Chaque signalement devient un ticket dans le dépôt GitHub du collectif, où il est examiné puis corrigé dans la carte si besoin.</p>
+<form id="sigform" class="card" style="display:grid;gap:10px;max-width:720px">
+  <div class="row"><label for="sigType" style="min-width:150px">Type d'erreur</label><select id="sigType"><option>Chiffre ou estimation</option><option>Limite de secteur ou rattachement d'un pâté de maisons</option><option>Information sur une école (capacité, cour, travaux)</option><option>Autre</option></select></div>
+  <div class="row"><label for="sigWhere" style="min-width:150px">École ou lieu concerné</label><input id="sigWhere" type="text" style="flex:1;min-width:220px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)" placeholder="Ex. : Sibelle, îlot m123, rue Dareau…"></div>
+  <div><label for="sigText">Ce qui est faux et ce qui serait juste</label><textarea id="sigText" rows="5" style="width:100%;font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)"></textarea></div>
+  <div class="row"><label for="sigSrc" style="min-width:150px">Source</label><input id="sigSrc" type="text" style="flex:1;min-width:220px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)" placeholder="Document, observation sur place…"></div>
+  <p class="small muted" style="margin:0">Les tickets sont publics&nbsp;: n'indiquez ni nom d'enfant, ni adresse personnelle, ni numéro de téléphone.</p>
+  <div class="row"><a id="sigLink" class="btn primary" href="#" target="_blank" rel="noopener">Ouvrir le ticket sur GitHub</a><button type="button" class="btn" id="sigCopy">Copier le texte</button><span class="small muted" id="sigStatus"></span></div>
+</form>
+<h3>Comment ça marche</h3>
+<ul>
+<li><b>Avec un compte GitHub</b> (gratuit)&nbsp;: le bouton ouvre un ticket déjà rempli, qu'il suffit de valider.</li>
+<li><b>Sans compte GitHub</b>&nbsp;: copiez le texte et transmettez-le au collectif, qui l'enregistrera.</li>
+<li>Les tickets sont relus régulièrement. Une fois la correction faite, le ticket est fermé avec la mention «&nbsp;corrigé&nbsp;» et la carte est mise à jour.</li>
+</ul>
+<p class="small muted">Liste des signalements&nbsp;: <a href="https://github.com/Ecoles-75014/carte-sectorisation/issues" target="_blank" rel="noopener">github.com/Ecoles-75014/carte-sectorisation/issues</a></p>
+</section>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
@@ -245,8 +271,10 @@ const svg=d3.select('#map'), g=svg.append('g');
 const gAtoms=g.append('g'), gGrid=g.append('g'), gOut=g.append('g'), gMoved=g.append('g'), gFlux=g.append('g'), gSch=g.append('g');
 const proj=d3.geoMercator(); const path=d3.geoPath(proj);
 svg.append('defs').html('<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker>');
-const zoom=d3.zoom().scaleExtent([0.8,14]).on('zoom',e=>{g.attr('transform',e.transform); g.selectAll('.lbl').attr('font-size',11/e.transform.k).attr('stroke-width',3/e.transform.k); g.selectAll('.sch').attr('r',4.5/e.transform.k).attr('stroke-width',1.5/e.transform.k); gFlux.selectAll('path').attr('stroke-width',2/e.transform.k); gFlux.selectAll('text').attr('font-size',10.5/e.transform.k).attr('stroke-width',3/e.transform.k); gAtoms.selectAll('path').attr('stroke-width',0.4/e.transform.k); gMoved.selectAll('path').attr('stroke-width',1.6/e.transform.k)});
+const zoom=d3.zoom().scaleExtent([0.8,14]).on('zoom',e=>{g.attr('transform',e.transform); g.selectAll('.lbl').attr('font-size',11/e.transform.k).attr('stroke-width',3/e.transform.k); g.selectAll('.sch').attr('r',4.5/e.transform.k).attr('stroke-width',1.5/e.transform.k); gFlux.selectAll('path').attr('stroke-width',2/e.transform.k); gFlux.selectAll('text').attr('font-size',10.5/e.transform.k).attr('stroke-width',3/e.transform.k); gAtoms.selectAll('path').attr('stroke-width',0.4/e.transform.k); gMoved.selectAll('path').attr('stroke-width',1.6/e.transform.k).attr('stroke-dasharray',`${3/e.transform.k} ${2/e.transform.k}`); gOut.selectAll('path').attr('stroke-width',0.7/e.transform.k); gGrid.selectAll('path').attr('stroke-width',0.3/e.transform.k); gLasso.selectAll('path').attr('stroke-width',2/e.transform.k)});
 svg.call(zoom);
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.getElementById('mapwrap').addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.getElementById('mapwrap').addEventListener('wheel',e=>{ if(e.ctrlKey) e.preventDefault(); },{passive:false});
 d3.select('#zin').on('click',()=>svg.transition().call(zoom.scaleBy,1.6));
 d3.select('#zout').on('click',()=>svg.transition().call(zoom.scaleBy,1/1.6));
 d3.select('#zreset').on('click',()=>svg.transition().call(zoom.transform,d3.zoomIdentity));
@@ -259,7 +287,7 @@ function draw(){
   const sel=gAtoms.selectAll('path').data(A,d=>d.properties.atom);
   sel.join('path').attr('class','atom').attr('d',path)
     .attr('fill',d=>GRID==='none'?col(schoolOf(d)):'var(--panel)').attr('fill-opacity',GRID==='none'?0.85:1)
-    .attr('stroke',d=>d.properties.atom===selected?'var(--ink)':'var(--panel)').attr('stroke-width',0.4)
+    .attr('stroke',d=>d.properties.atom===selected?'var(--ink)':'var(--panel)').attr('stroke-width',0.4/d3.zoomTransform(svg.node()).k)
     .on('mousemove',(e,d)=>{const p=d.properties; const r=document.getElementById('mapwrap').getBoundingClientRect();
       tip.style('display','block').style('left',(e.clientX-r.left+12)+'px').style('top',(e.clientY-r.top+12)+'px')
       .html(`<b>${schoolOf(d)}</b><br>Actuel : ${p.s26}<br>2027 mairie : ${p.s27}<br>≈${NB}${fmt1(p.est)}${NB}élèves estimés · ${fmt(p.logements)}${NB}logements`)})
@@ -278,7 +306,7 @@ function draw(){
   gOut.selectAll('path').data(GRID==='none'?[]:A,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke','#8a918e').attr('stroke-opacity',0.85).attr('stroke-width',0.7/d3.zoomTransform(svg.node()).k).style('pointer-events','none');
   // moved outlines
   const M=document.getElementById('cMoved').checked&&VIEW!=='r26'?A.filter(d=>schoolOf(d)!==d.properties.s26):[];
-  gMoved.selectAll('path').data(M,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke','var(--ink)').attr('stroke-width',1.6).attr('stroke-dasharray','3 2').style('pointer-events','none');
+  gMoved.selectAll('path').data(M,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke','var(--ink)').attr('stroke-width',1.6/d3.zoomTransform(svg.node()).k).attr('stroke-dasharray',`${3/d3.zoomTransform(svg.node()).k} ${2/d3.zoomTransform(svg.node()).k}`).style('pointer-events','none');
   // flows
   const S=DATA[LV].schools;
   const F=document.getElementById('cFlux').checked&&VIEW!=='r26'?DATA.flows.filter(f=>f.lv===LV&&f.annonce!=null):[];
@@ -362,7 +390,8 @@ function showSel(d){
   const p=d.properties, S=DATA[LV].schools;
   const opts=Object.keys(S).sort().map(n=>`<option ${n===(scen[LV][p.atom]||p.s27)?'selected':''}>${n}</option>`).join('');
   document.getElementById('sel').innerHTML=`<table><tr><td>École actuelle</td><td>${p.s26}</td></tr><tr><td>École 2027 (mairie)</td><td>${p.s27}</td></tr><tr><td>Élèves estimés</td><td>${fmt1(p.est)}</td></tr><tr><td>Enfants INSEE 2019</td><td>${fmt1(p.insee)}</td></tr><tr><td>Logements (BD TOPO)</td><td>${fmt(p.logements)}</td></tr></table>
-  <div class="row" style="margin-top:8px"><label for="assign" class="small">Rattacher dans « Mon scénario » à</label><select id="assign">${opts}</select></div>`;
+  <div class="row" style="margin-top:8px"><label for="assign" class="small">Rattacher dans « Mon scénario » à</label><select id="assign">${opts}</select></div><div style="margin-top:8px"><button class="btn" id="sigAtom">Signaler une erreur sur cet îlot</button></div>`;
+  document.getElementById('sigAtom').onclick=()=>signalAtom(p);
   document.getElementById('assign').onchange=e=>{assign(p,e.target.value); draw();};
 }
 function segSet(id,v){document.querySelectorAll('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));}
@@ -396,6 +425,22 @@ document.getElementById('copy').onclick=async()=>{
 <li><b>Sarrette (55) vers Tombe-Issoire (29&nbsp;élèves).</b> Ces élèves viennent de la cour des Ateliers, où la BD TOPO ne recense pas encore de logements. La mairie mentionne 169&nbsp;logements sociaux, ce qui laisse penser à un programme livré récemment ou à venir.</li>
 </ul>`;
 })();
+// signalements
+const REPO='https://github.com/Ecoles-75014/carte-sectorisation/issues/new';
+function sigBody(){ const v=id=>document.getElementById(id).value.trim();
+  return `**Type** : ${v('sigType')}\n\n**École ou lieu** : ${v('sigWhere')||'–'}\n\n**Description**\n${v('sigText')||'–'}\n\n**Source** : ${v('sigSrc')||'–'}\n\n_Signalement envoyé depuis la carte (vue : ${LV==='mat'?'maternelle':'élémentaire'}, ${VIEW})._`; }
+function sigUpdate(){ const where=document.getElementById('sigWhere').value.trim(); const ty=document.getElementById('sigType').value;
+  const lab=['signalement', ty.startsWith('Chiffre')?'chiffre':(ty.startsWith('Limite')?'secteur':null)].filter(Boolean).join(',');
+  const title=`[Signalement] ${ty}${where?' – '+where:''}`;
+  document.getElementById('sigLink').href=`${REPO}?labels=${encodeURIComponent(lab)}&title=${encodeURIComponent(title)}&body=${encodeURIComponent(sigBody())}`; }
+['sigType','sigWhere','sigText','sigSrc'].forEach(i=>document.getElementById(i).addEventListener('input',sigUpdate));
+document.getElementById('sigform').addEventListener('submit',e=>e.preventDefault());
+document.getElementById('sigCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(sigBody()); document.getElementById('sigStatus').textContent='Texte copié.'; }catch(e){ document.getElementById('sigStatus').textContent='Copie refusée par le navigateur : sélectionnez le texte à la main.'; } };
+function signalAtom(p){ document.getElementById('sigType').value='Limite de secteur ou rattachement d\'un pâté de maisons';
+  document.getElementById('sigWhere').value=`îlot ${p.atom} (actuel : ${p.s26} ; 2027 mairie : ${p.s27})`; sigUpdate();
+  document.querySelector('nav button[data-t="signal"]').click(); document.getElementById('sigText').focus(); }
+sigUpdate();
+
 fillBrush(); fillClosing(); fit();
 </script>
 </body>

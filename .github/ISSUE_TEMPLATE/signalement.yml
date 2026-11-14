@@ -1,0 +1,35 @@
+name: Signaler une erreur sur la carte
+description: Un chiffre, une limite de secteur ou une information à corriger
+title: "[Signalement] "
+labels: ["signalement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de votre signalement. Ce ticket est **public** : n'y indiquez ni nom d'enfant, ni adresse personnelle, ni numéro de téléphone.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type d'erreur
+      options:
+        - Chiffre ou estimation
+        - Limite de secteur ou rattachement d'un pâté de maisons
+        - Information sur une école (capacité, cour, travaux)
+        - Autre
+    validations:
+      required: true
+  - type: input
+    id: ecole
+    attributes:
+      label: École ou lieu concerné
+      placeholder: "Ex. : Sibelle, îlot m123, rue Dareau…"
+  - type: textarea
+    id: description
+    attributes:
+      label: Ce qui est faux et ce qui serait juste
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source (document, observation sur place…)
