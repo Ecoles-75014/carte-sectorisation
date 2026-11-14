@@ -97,6 +97,10 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
         <div class="seg" id="view"><button aria-pressed="false" data-v="r26">Actuel</button><button aria-pressed="false" data-v="r27">2027 mairie</button><button aria-pressed="true" data-v="scen">Mon scénario</button></div>
       </div>
       <div class="row" style="margin-top:8px">
+        <span class="small muted">Secteur&nbsp;:</span>
+        <div class="seg" id="grp"><button aria-pressed="true" data-v="AB">A et B</button><button aria-pressed="false" data-v="A">Secteur A</button><button aria-pressed="false" data-v="B">Secteur B</button></div>
+      </div>
+      <div class="row" style="margin-top:8px">
         <label class="chk"><input type="checkbox" id="cFlux" checked> Flux annoncés</label>
         <label class="chk"><input type="checkbox" id="cMoved" checked> Zones déplacées</label>
         <label class="chk"><input type="checkbox" id="cLab" checked> Noms des écoles</label>
@@ -252,6 +256,10 @@ const NB=' ';
 const fmt=n=>n==null||isNaN(n)?'–':Math.round(n).toLocaleString('fr-FR').replace(/ /g,NB);
 const fmt1=n=>n==null||isNaN(n)?'–':n.toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1});
 let LV='mat', VIEW='scen', GRID='none';
+let GRP='AB';
+const GROUPB={mat:['ALESIA (3B)','TOMBE ISSOIRE (77)','JEAN DOLENT (11)','SARRETTE (34)','SARRETTE (55)','SIBELLE (13) POLY'],elem:['ALESIA (3)','ALESIA (12)','ARAGO (87)',"PRISSE D'AVENNES (5)",'SIBELLE (13) POLY']};
+const inGrp=(n,lv)=>{ lv=lv||LV; if(GRP==='AB'||!n) return true; const b=GROUPB[lv].includes(n); return GRP==='B'?b:!b; };
+const atomIn=a=>GRP==='AB'||inGrp(a.properties.s26)||inGrp(a.properties.s27)||inGrp(schoolOf(a));
 let scen={mat:{},elem:{}};
 try{const s=JSON.parse(localStorage.getItem('secto14-scen')||'null'); if(s&&s.mat) scen=s;}catch(e){}
 const save=()=>{try{localStorage.setItem('secto14-scen',JSON.stringify(scen))}catch(e){}};
@@ -279,12 +287,12 @@ document.getElementById('mapwrap').addEventListener('wheel',e=>{ if(e.ctrlKey) e
 d3.select('#zin').on('click',()=>svg.transition().call(zoom.scaleBy,1.6));
 d3.select('#zout').on('click',()=>svg.transition().call(zoom.scaleBy,1/1.6));
 d3.select('#zreset').on('click',()=>svg.transition().call(zoom.transform,d3.zoomIdentity));
-function fit(){const r=document.getElementById('mapwrap').getBoundingClientRect(); if(!r.width) return; svg.attr('viewBox',`0 0 ${r.width} ${r.height}`); proj.fitExtent([[12,12],[r.width-12,r.height-12]],DATA.arr); draw();}
+function fit(){const r=document.getElementById('mapwrap').getBoundingClientRect(); if(!r.width) return; svg.attr('viewBox',`0 0 ${r.width} ${r.height}`); proj.fitExtent([[12,12],[r.width-12,r.height-12]],GRP==='AB'?DATA.arr:{type:'FeatureCollection',features:DATA[LV].atoms.features.filter(a=>inGrp(a.properties.s26)||inGrp(a.properties.s27))}); svg.call(zoom.transform,d3.zoomIdentity); draw();}
 window.addEventListener('resize',fit);
 const tip=d3.select('#tip');
 let selected=null;
 function draw(){
-  const A=DATA[LV].atoms.features;
+  const A=DATA[LV].atoms.features.filter(atomIn);
   const sel=gAtoms.selectAll('path').data(A,d=>d.properties.atom);
   sel.join('path').attr('class','atom').attr('d',path)
     .attr('fill',d=>GRID==='none'?col(schoolOf(d)):'var(--panel)').attr('fill-opacity',GRID==='none'?0.85:1)
@@ -295,7 +303,7 @@ function draw(){
     .on('mouseleave',()=>tip.style('display','none'))
     .on('click',(e,d)=>{ if(MODE==='draw') return; if(MODE==='brush'){ assign(d.properties,document.getElementById('brushSchool').value); } selected=d.properties.atom; showSel(d); draw();});
   // grid
-  const G=GRID==='none'?[]:DATA['grid'+GRID+'m'].features;
+  const G=GRID==='none'?[]:DATA['grid'+GRID+'m'].features.filter(c=>GRP==='AB'||inGrp(c.properties[LV+'_R26'])||inGrp(c.properties[LV+'_R27']));
   const key=LV+'_est'; const mx=d3.max(G,d=>d.properties[key])||1;
   const cs=d3.scaleSequential([0,mx],d3.interpolateYlGnBu);
   gGrid.selectAll('path').data(G,d=>d.properties.id).join('path').attr('d',path).attr('fill',d=>d.properties[key]>0?cs(d.properties[key]):'none').attr('fill-opacity',0.5).attr('stroke','var(--muted)').attr('stroke-opacity',0.25).attr('stroke-width',0.3)
@@ -310,7 +318,7 @@ function draw(){
   gMoved.selectAll('path').data(M,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke','var(--ink)').attr('stroke-width',1.6/d3.zoomTransform(svg.node()).k).attr('stroke-dasharray',`${3/d3.zoomTransform(svg.node()).k} ${2/d3.zoomTransform(svg.node()).k}`).style('pointer-events','none');
   // flows
   const S=DATA[LV].schools;
-  const F=document.getElementById('cFlux').checked&&VIEW!=='r26'?DATA.flows.filter(f=>f.lv===LV&&f.annonce!=null):[];
+  const F=document.getElementById('cFlux').checked&&VIEW!=='r26'?DATA.flows.filter(f=>f.lv===LV&&f.annonce!=null&&(GRP==='AB'||f.grp===GRP)):[];
   const fl=F.map(f=>{const at=A.filter(a=>a.properties.s26===f.de&&a.properties.s27===f.vers);
      let o; if(at.length){const c=at.map(a=>path.centroid(a)); const w=at.map(a=>a.properties.est+0.1); const W=d3.sum(w); o=[d3.sum(c,(p,i)=>p[0]*w[i])/W,d3.sum(c,(p,i)=>p[1]*w[i])/W];}
      else if(S[f.de]&&S[f.de].pt) o=proj(S[f.de].pt);
@@ -321,7 +329,7 @@ function draw(){
     .attr('fill','none').attr('stroke','var(--ink)').attr('stroke-width',2/k).attr('marker-end','url(#arr)').style('color','var(--ink)').attr('opacity',0.8);
   fg.select('text').attr('x',d=>(d.o[0]+d.t[0])/2-(d.t[1]-d.o[1])*0.075).attr('y',d=>(d.o[1]+d.t[1])/2+(d.t[0]-d.o[0])*0.075).text(d=>d.annonce).attr('font-size',10.5/k).attr('font-weight',600).attr('text-anchor','middle').attr('fill','var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3/k).attr('paint-order','stroke');
   // schools
-  const SS=Object.entries(S).filter(([n,v])=>v.pt);
+  const SS=Object.entries(S).filter(([n,v])=>v.pt&&inGrp(n));
   const sg=gSch.selectAll('g').data(SS,d=>d[0]).join(en=>{const x=en.append('g');x.append('circle').attr('class','sch');x.append('text').attr('class','lbl');return x;});
   sg.select('circle').attr('cx',d=>proj(d[1].pt)[0]).attr('cy',d=>proj(d[1].pt)[1]).attr('r',4.5/k)
     .attr('fill',d=>d[1].ferme&&VIEW!=='r26'?'var(--panel)':col(d[0])).attr('stroke',d=>d[1].ferme&&VIEW!=='r26'?'var(--warn)':'var(--ink)').attr('stroke-width',1.5/k);
@@ -340,7 +348,7 @@ function assign(p,v){ if(v===p.s27) delete scen[LV][p.atom]; else scen[LV][p.ato
 function schoolList(){ return Object.keys(DATA[LV].schools).sort(); }
 function fillBrush(){ const s=document.getElementById('brushSchool'); const cur=s.value; s.innerHTML=schoolList().map(n=>`<option${n===cur?' selected':''}>${n}</option>`).join(''); }
 function fillClosing(){
-  const S=DATA[LV].schools; const cl=Object.keys(S).filter(n=>S[n].ferme).sort();
+  const S=DATA[LV].schools; const cl=Object.keys(S).filter(n=>S[n].ferme&&inGrp(n)).sort();
   document.getElementById('closing').innerHTML=cl.map((n,i)=>{const own=DATA[LV].atoms.features.filter(a=>a.properties.s26===n); const kept=own.length&&own.every(a=>scen[LV][a.properties.atom]===n);
     return `<label><input type="checkbox" id="keep${i}" data-n="${n}" ${kept?'checked':''}> ${n}</label>`}).join('')||'<span class="small muted">Aucune fermeture à ce niveau.</span>';
   document.querySelectorAll('#closing input').forEach(c=>c.onchange=()=>{const n=c.dataset.n;
@@ -368,7 +376,7 @@ function table(){
   const X=DATA.extra||{hist:{},sites:[]};
   const other={mat:totals(VIEW==='r26'?'r26':(VIEW==='r27'?'r27':'scen'),'mat'),elem:totals(VIEW==='r26'?'r26':(VIEW==='r27'?'r27':'scen'),'elem')};
   const siteOf=n=>X.sites.find(s=>s.members.some(m=>m[0]===LV&&m[1]===n));
-  const names=Object.keys(S).filter(n=>(t26[n]||t27[n]||tsc[n]||S[n].nv)).sort((a,b)=>(tsc[b]||0)-(tsc[a]||0));
+  const names=Object.keys(S).filter(n=>inGrp(n)&&(t26[n]||t27[n]||tsc[n]||S[n].nv)).sort((a,b)=>(tsc[b]||0)-(tsc[a]||0));
   const lab=VIEW==='r26'?'Actuel':(VIEW==='r27'?'2027 mairie':'Mon scénario');
   let h=`<thead><tr><th>École</th><th>Élèves estimés<br>actuel</th><th>Élèves estimés<br>2027 mairie</th><th>Élèves estimés<br>${lab}</th><th>Mairie<br>Nv secteur</th><th>Classes max<br>mairie</th><th>Max classes<br>2009-2025</th><th>Capacité<br>retenue</th><th>Élèves / classe<br>(${lab})</th><th>Cour (m²)<br>non bâti · avec dalles</th><th>Cour m² / élève<br>(${lab})</th></tr></thead><tbody>`;
   names.forEach(n=>{const s=S[n]; const v=tsc[n]||0; const H=X.hist[LV+'|'+n]||{};
@@ -397,8 +405,8 @@ function showSel(d){
 }
 function segSet(id,v){document.querySelectorAll('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));}
 function seg(id,fn){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{segSet(id,b.dataset.v);fn(b.dataset.v);});}
-seg('lv',v=>{LV=v;selected=null;fillBrush();fillClosing();document.getElementById('sel').innerHTML='Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Mon scénario ».';draw();});
-seg('view',v=>{VIEW=v;draw();}); seg('grid',v=>{GRID=v;draw();});
+seg('lv',v=>{LV=v;selected=null;fillBrush();fillClosing(); if(GRP!=='AB'){ fit(); }document.getElementById('sel').innerHTML='Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Mon scénario ».';draw();});
+seg('view',v=>{VIEW=v;draw();}); seg('grp',v=>{GRP=v; fit();}); seg('grid',v=>{GRID=v;draw();});
 ['cFlux','cMoved','cLab'].forEach(i=>document.getElementById(i).onchange=draw);
 document.getElementById('reset').onclick=()=>{scen[LV]={};save();draw();if(selected){const d=DATA[LV].atoms.features.find(a=>a.properties.atom===selected); if(d) showSel(d);}};
 document.getElementById('copy').onclick=async()=>{
