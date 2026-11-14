@@ -480,11 +480,14 @@ sigUpdate();
 function scenFile(){ return {format:'secto14-scenario',version:1,cree_le:new Date().toISOString(),
   description:'Scénario alternatif de sectorisation du 14e : îlots rattachés à une autre école que dans le projet de la mairie.',
   mat:scen.mat, elem:scen.elem}; }
+let DL=null;
+try{ if(window.claude&&typeof window.claude.use==='function'){ window.claude.use('downloads').then(d=>{DL=d;}).catch(()=>{}); } }catch(e){}
 document.getElementById('exportScen').onclick=async()=>{
-  const txt=JSON.stringify(scenFile(),null,1); const st=document.getElementById('status');
-  try{ const url=URL.createObjectURL(new Blob([txt],{type:'application/json'})); const a=document.createElement('a'); a.href=url; a.download='scenario-sectorisation-14e.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);}catch(e){}
-  let copied=false; if(window.self!==window.top){ try{ await navigator.clipboard.writeText(txt); copied=true; }catch(e){} }
-  st.textContent=copied?'Fichier proposé au téléchargement. Si rien ne se télécharge dans cet aperçu, le scénario a aussi été copié : collez-le dans un fichier .json.':'Fichier « scenario-sectorisation-14e.json » téléchargé.';
+  const txt=JSON.stringify(scenFile(),null,1); const st=document.getElementById('status'); const name='scenario-sectorisation-14e.json';
+  if(DL){ try{ await DL.save({filename:name,data:txt}); st.textContent=`Fichier « ${name} » enregistré.`; }catch(e){ st.textContent='Téléchargement annulé ou refusé.'; } return; }
+  if(window.self!==window.top){ try{ await navigator.clipboard.writeText(txt); st.textContent='Le téléchargement n\'est pas disponible ici : le scénario a été copié, collez-le dans un fichier .json.'; }catch(e){ st.textContent='Le téléchargement n\'est pas disponible ici. Ouvrez la version publiée sur GitHub pour exporter le fichier.'; } return; }
+  const url=URL.createObjectURL(new Blob([txt],{type:'application/json'})); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+  st.textContent=`Fichier « ${name} » téléchargé.`;
 };
 document.getElementById('importScen').onchange=async e=>{
   const f=e.target.files[0]; const st=document.getElementById('status'); if(!f) return;
