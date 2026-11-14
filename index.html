@@ -452,7 +452,7 @@ function legend(mx,cs){
 let MODE='brush', lasso=[], lassoGeo=null;
 const gLasso=g.append('g');
 function assign(p,v){ if(v===baseOf(p)) delete scen[LV][p.atom]; else scen[LV][p.atom]=v; save(); if(VIEW!=='scen'){VIEW='scen'; segSet('view','scen');} }
-function schoolList(){ return Object.keys(DATA[LV].schools).sort(); }
+function schoolList(){ return Object.keys(DATA[LV].schools).filter(n=>inGrp(n)).sort(); }
 function fillBrush(){ const s=document.getElementById('brushSchool'); const cur=s.value; s.innerHTML='<option value="">Choisir une école…</option>'+schoolList().map(n=>`<option${n===cur?' selected':''}>${n}</option>`).join(''); }
 function mairieInto(lv){ scen[lv]={}; DATA[lv].atoms.features.forEach(a=>{ if(a.properties.s27!==baseOf(a.properties)) scen[lv][a.properties.atom]=a.properties.s27; }); }
 function nearestOpen(a,closed){ const S=DATA[LV].schools; const c=d3.geoCentroid(a); let best=null,bd=1e9;
@@ -517,7 +517,7 @@ function table(){
 }
 function showSel(d){
   const p=d.properties, S=DATA[LV].schools;
-  const opts=Object.keys(S).sort().map(n=>`<option ${n===(scen[LV][p.atom]||baseOf(p))?'selected':''}>${n}</option>`).join('');
+  const opts=Object.keys(S).filter(n=>inGrp(n)||n===(scen[LV][p.atom]||baseOf(p))).sort().map(n=>`<option ${n===(scen[LV][p.atom]||baseOf(p))?'selected':''}>${n}</option>`).join('');
   document.getElementById('sel').innerHTML=`<table><tr><td>École actuelle</td><td>${p.s26}</td></tr><tr><td>École 2027 (mairie)</td><td>${p.s27}</td></tr><tr><td>Élèves estimés</td><td>${fmt1(p.est)}</td></tr><tr><td>Enfants INSEE 2019</td><td>${fmt1(p.insee)}</td></tr><tr><td>Logements (BD TOPO)</td><td>${fmt(p.logements)}</td></tr></table>
   <div class="row" style="margin-top:8px"><label for="assign" class="small">Rattacher dans « Scénario alternatif » à</label><select id="assign">${opts}</select></div><div style="margin-top:8px"><button class="btn" id="sigAtom">Signaler une erreur sur cet îlot</button></div>`;
   document.getElementById('sigAtom').onclick=()=>signalAtom(p);
@@ -526,7 +526,7 @@ function showSel(d){
 function segSet(id,v){document.querySelectorAll('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));}
 function seg(id,fn){document.querySelectorAll('#'+id+' button').forEach(b=>b.onclick=()=>{segSet(id,b.dataset.v);fn(b.dataset.v);});}
 seg('lv',v=>{LV=v;selected=null;fillBrush();fillClosing(); if(GRP!=='AB'){ fit(); }document.getElementById('sel').innerHTML='Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Scénario alternatif ».';draw();});
-seg('view',v=>{VIEW=v;draw();}); seg('grp',v=>{GRP=v; fit();}); seg('grid',v=>{GRID=v;draw();});
+seg('view',v=>{VIEW=v;draw();}); seg('grp',v=>{GRP=v; fillBrush(); fit();}); seg('grid',v=>{GRID=v;draw();});
 ['cFlux','cMoved','cLab','cEff'].forEach(i=>document.getElementById(i).onchange=draw);
 document.getElementById('loadMairie').onclick=()=>{ snapshot(); mairieInto('mat'); mairieInto('elem'); save(); VIEW='scen'; segSet('view','scen'); draw(); };
 document.getElementById('reset').onclick=()=>{snapshot(); scen={mat:{},elem:{}};save();VIEW='scen';segSet('view','scen');draw();if(selected){const d=DATA[LV].atoms.features.find(a=>a.properties.atom===selected); if(d) showSel(d);}};
