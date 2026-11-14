@@ -30,6 +30,7 @@ section.tab.on{display:block}
 #t-carte.on{display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-rows:minmax(560px,72vh) auto;gap:16px}
 #tblcard{grid-column:1 / -1}
 svg#map.drawing{cursor:crosshair}
+.closing-list{max-height:210px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
 .closing-list label{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 0}
 .closing-list label.closed{color:var(--danger)}
 @media (max-width:980px){ #t-carte.on{grid-template-columns:1fr;grid-template-rows:auto} #mapwrap{height:70vh} }
@@ -115,15 +116,15 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
     </div>
     <div class="card">
       <h2>Modifier le scénario</h2>
-      <div class="seg" id="mode"><button aria-pressed="true" data-v="sel">Sélection</button><button aria-pressed="false" data-v="brush">Pinceau</button><button aria-pressed="false" data-v="draw">Dessiner un secteur</button></div>
+      <div class="seg" id="mode"><button aria-pressed="true" data-v="brush">Sélection par bloc</button><button aria-pressed="false" data-v="draw">Dessiner un secteur</button></div>
       <div class="row" style="margin-top:8px"><label for="brushSchool" class="small muted">École à appliquer</label><select id="brushSchool"></select></div>
-      <p class="small muted" id="modeHelp" style="margin:6px 0 0">Cliquez sur un pâté de maisons pour voir son estimation et choisir son école.</p>
+      <p class="small muted" id="modeHelp" style="margin:6px 0 0">Choisissez une école ci-dessus, puis cliquez sur chaque pâté de maisons à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche du pâté.</p>
       <div class="row" id="drawBar" style="margin-top:6px;display:none"><button class="btn primary" id="drawApply">Rattacher les îlots tracés</button><button class="btn" id="drawCancel">Effacer le tracé</button><span class="small muted" id="drawInfo"></span></div>
-      <h3 class="small" style="margin:12px 0 4px;font-weight:600">Écoles que le projet ferme</h3><p class="small muted" style="margin:0 0 4px">Cochée&nbsp;: l'école reste ouverte avec son secteur actuel. Décochée&nbsp;: ses élèves sont répartis comme dans le projet de la mairie.</p>
+      <h3 class="small" style="margin:12px 0 4px;font-weight:600">Écoles ouvertes</h3><p class="small muted" style="margin:0 0 4px">Cochée&nbsp;: l'école est ouverte. Décochée&nbsp;: elle ferme et ses îlots vont, pour les fermetures prévues par la mairie, vers l'école désignée par le projet, sinon vers l'école ouverte la plus proche.</p>
       <div class="closing-list" id="closing"></div>
     </div>
     <div class="card" id="edit">
-      <h2>Îlot sélectionné</h2>
+      <h2>Fiche de l'îlot</h2>
       <div id="sel" class="small muted">Cliquez sur un îlot de la carte pour voir son estimation et le rattacher à une autre école dans « Scénario alternatif ».</div>
     </div>
   </div>
@@ -330,7 +331,7 @@ function draw(){
       tip.style('display','block').style('left',(e.clientX-r.left+12)+'px').style('top',(e.clientY-r.top+12)+'px')
       .html(`<b>${schoolOf(d)}</b><br>Actuel : ${p.s26}<br>2027 mairie : ${p.s27}<br>≈${NB}${fmt1(p.est)}${NB}élèves estimés · ${fmt(p.logements)}${NB}logements`)})
     .on('mouseleave',()=>tip.style('display','none'))
-    .on('click',(e,d)=>{ if(MODE==='draw') return; if(MODE==='brush'){ assign(d.properties,document.getElementById('brushSchool').value); } selected=d.properties.atom; showSel(d); draw();});
+    .on('click',(e,d)=>{ if(MODE==='draw') return; if(MODE==='brush'){ const v=document.getElementById('brushSchool').value; if(v) assign(d.properties,v); } selected=d.properties.atom; showSel(d); draw();});
   // grid
   const G=GRID==='none'?[]:DATA['grid'+GRID+'m'].features.filter(c=>GRP==='AB'||inGrp(c.properties[LV+'_R26'])||inGrp(c.properties[LV+'_R27']));
   const key=LV+'_est'; const mx=d3.max(G,d=>d.properties[key])||1;
@@ -367,12 +368,12 @@ function draw(){
     .attr('fill','none').attr('stroke',d=>d.sc?'#c0262d':'var(--ink)').attr('stroke-width',2/k).attr('marker-end',d=>d.sc?'url(#arrS)':'url(#arr)').style('color','var(--ink)').attr('opacity',0.85);
   fg.select('text').attr('x',d=>(d.o[0]+d.t[0])/2-(d.t[1]-d.o[1])*0.075).attr('y',d=>(d.o[1]+d.t[1])/2+(d.t[0]-d.o[0])*0.075).text(d=>d.lab).attr('font-size',10.5/k).attr('font-weight',600).attr('text-anchor','middle').attr('fill',d=>d.sc?'#c0262d':'var(--ink)').attr('stroke','var(--panel)').attr('stroke-width',3/k).attr('paint-order','stroke');
   // schools
-  const TOT=totals(VIEW==='r26'?'r26':(VIEW==='r27'?'r27':'scen'));
+  const TOT=totals(VIEW==='r26'?'r26':(VIEW==='r27'?'r27':'scen')); const T26=totals('r26');
   const SS=Object.entries(S).filter(([n,v])=>v.pt&&inGrp(n));
   const kk=d3.zoomTransform(svg.node()).k; const X=DATA.extra||{hist:{}};
   const capEl=n=>{ const s=S[n]; if(!s||!s.cap||!s.clmax) return null; const H=X.hist[LV+'|'+n]||{}; const cl=H.poly?s.clmax:Math.max(s.clmax,H.hmax||0); return cl*s.cap/s.clmax; };
   const RR=7, arc=d3.arc().innerRadius(0).outerRadius(RR);
-  const info=SS.map(([n,v])=>{ const tot=TOT[n]||0; const cap=capEl(n); const closed=v.ferme&&VIEW!=='r26'&&tot<1; return {n,v,p:proj(v.pt),tot,cap,occ:cap?tot/cap:null,closed}; });
+  const info=SS.map(([n,v])=>{ const tot=TOT[n]||0; const cap=capEl(n); const closed=VIEW!=='r26'&&tot<1&&(T26[n]||0)>0; return {n,v,p:proj(v.pt),tot,cap,occ:cap?tot/cap:null,closed}; });
   const sg=gSch.selectAll('g.school').data(info,d=>d.n).join(en=>{const x=en.append('g').attr('class','school');
       x.append('circle').attr('class','bg'); x.append('path').attr('class','pie'); x.append('circle').attr('class','ring'); x.append('text').attr('class','warn'); x.append('text').attr('class','lbl'); return x;})
     .attr('transform',d=>`translate(${d.p[0]},${d.p[1]}) scale(${1/kk})`)
@@ -395,25 +396,33 @@ function legend(mx,cs){
   L.innerHTML=`<b>${VIEW==='r26'?'Secteurs actuels (2026-2027)':VIEW==='r27'?'Secteurs 2027 reconstitués':'Scénario alternatif'}</b><br><span class="muted">Contour pointillé : îlot qui change d'école. ${VIEW==='scen'?'Flèches rouges : élèves estimés qui changent d\'école par rapport à aujourd\'hui, recalculés à chaque modification.':'Chiffre sur une flèche : élèves annoncés par la mairie.'} Cercle vide : école qui ferme.</span><br><span class="muted">Camembert : taux d'occupation (élèves estimés ÷ capacité retenue) <span class="sw" style="background:#3d9a5b"></span>&lt;${NB}85${NB}% <span class="sw" style="background:#e39a2d"></span>85-100${NB}% <span class="sw" style="background:#c0262d"></span>! dépassement</span>`;
 }
 
-let MODE='sel', lasso=[], lassoGeo=null;
+let MODE='brush', lasso=[], lassoGeo=null;
 const gLasso=g.append('g');
 function assign(p,v){ if(v===baseOf(p)) delete scen[LV][p.atom]; else scen[LV][p.atom]=v; save(); if(VIEW!=='scen'){VIEW='scen'; segSet('view','scen');} }
 function schoolList(){ return Object.keys(DATA[LV].schools).sort(); }
-function fillBrush(){ const s=document.getElementById('brushSchool'); const cur=s.value; s.innerHTML=schoolList().map(n=>`<option${n===cur?' selected':''}>${n}</option>`).join(''); }
+function fillBrush(){ const s=document.getElementById('brushSchool'); const cur=s.value; s.innerHTML='<option value="">Choisir une école…</option>'+schoolList().map(n=>`<option${n===cur?' selected':''}>${n}</option>`).join(''); }
 function mairieInto(lv){ scen[lv]={}; DATA[lv].atoms.features.forEach(a=>{ if(a.properties.s27!==baseOf(a.properties)) scen[lv][a.properties.atom]=a.properties.s27; }); }
-function isOpen(n){ const own=DATA[LV].atoms.features.filter(a=>baseOf(a.properties)===n);
-  if(VIEW==='r26') return true; if(VIEW==='r27') return false;
-  return own.some(a=>(scen[LV][a.properties.atom]||n)===n); }
+function nearestOpen(a,closed){ const S=DATA[LV].schools; const c=d3.geoCentroid(a); let best=null,bd=1e9;
+  Object.entries(S).forEach(([n,v])=>{ if(!v.pt||closed.has(n)||n==='PINARD POLY'&&false) return; const dd=d3.geoDistance(c,v.pt); if(dd<bd){bd=dd;best=n;} }); return best; }
+function closedSet(){ const s=new Set(); Object.keys(DATA[LV].schools).forEach(n=>{ if(!isOpen(n)) s.add(n); }); return s; }
+function isOpen(n){ const F=DATA[LV].atoms.features;
+  if(VIEW==='r26') return F.some(a=>a.properties.s26===n)||n==='PINARD POLY'; if(VIEW==='r27') return F.some(a=>a.properties.s27===n);
+  return F.some(a=>(scen[LV][a.properties.atom]||baseOf(a.properties))===n); }
 function fillClosing(){
-  const S=DATA[LV].schools; const cl=Object.keys(S).filter(n=>S[n].ferme&&inGrp(n)).sort();
+  const S=DATA[LV].schools; const cl=Object.keys(S).filter(n=>inGrp(n)).sort((x,y)=>(S[y].ferme-S[x].ferme)||x.localeCompare(y));
   document.getElementById('closing').innerHTML=cl.map((n,i)=>{const open=isOpen(n);
-    return `<label${open?'':' class="closed"'}><input type="checkbox" id="keep${i}" data-n="${n}" ${open?'checked':''}> ${n}${open?'':' <b>· fermée</b>'}</label>`}).join('')||'<span class="small muted">Aucune fermeture prévue à ce niveau.</span>';
+    return `<label${open?'':' class="closed"'}><input type="checkbox" id="keep${i}" data-n="${n}" ${open?'checked':''}> ${n}${S[n].ferme?' <span class="muted small">(fermée par le projet)</span>':''}${open?'':' <b>· fermée</b>'}</label>`}).join('');
   document.querySelectorAll('#closing input').forEach(c=>c.onchange=()=>{const n=c.dataset.n;
     if(VIEW==='r27'){ mairieInto('mat'); mairieInto('elem'); } else if(VIEW==='r26'){ scen={mat:{},elem:{}}; }
-    DATA[LV].atoms.features.filter(a=>baseOf(a.properties)===n).forEach(a=>{ if(c.checked) delete scen[LV][a.properties.atom]; else if(a.properties.s27!==n) scen[LV][a.properties.atom]=a.properties.s27; });
-    save(); VIEW='scen'; segSet('view','scen'); draw();});
+    VIEW='scen'; segSet('view','scen');
+    const F=DATA[LV].atoms.features;
+    if(c.checked){ F.filter(a=>baseOf(a.properties)===n).forEach(a=>{ delete scen[LV][a.properties.atom]; }); }
+    else { const closed=closedSet(); closed.add(n);
+      F.filter(a=>(scen[LV][a.properties.atom]||baseOf(a.properties))===n).forEach(a=>{ const p=a.properties;
+        let dest=(S[n].ferme&&p.s26===n&&!closed.has(p.s27))?p.s27:nearestOpen(a,closed); assign(p,dest); }); }
+    save(); draw();});
 }
-const HELP={sel:'Cliquez sur un pâté de maisons pour voir son estimation et choisir son école.',brush:'Chaque clic sur un pâté de maisons le rattache à l\'école choisie ci-dessus.',draw:'Maintenez le bouton enfoncé et tracez un contour à main levée, puis rattachez les îlots qu\'il contient à l\'école choisie.'};
+const HELP={brush:'Choisissez une école ci-dessus, puis cliquez sur chaque pâté de maisons à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche du pâté.',draw:'Choisissez une école, maintenez le bouton enfoncé et tracez un contour à main levée, puis rattachez les îlots qu\'il contient.'};
 function setMode(v){ MODE=v; document.getElementById('modeHelp').textContent=HELP[v]; document.getElementById('drawBar').style.display=v==='draw'?'flex':'none';
   svg.classed('drawing',v==='draw'); if(v==='draw'){ svg.on('.zoom',null); } else { svg.call(zoom); lasso=[]; lassoGeo=null; drawLasso(); } }
 function toGeo(ev){ const [x,y]=d3.pointer(ev,svg.node()); const t=d3.zoomTransform(svg.node()); return proj.invert(t.invert([x,y])); }
@@ -424,7 +433,7 @@ function inLasso(){ if(!lassoGeo) return []; const P=lassoGeo.map(p=>proj(p)); r
 function drawLasso(done){ const k=d3.zoomTransform(svg.node()).k; const P=lasso.map(p=>proj(p));
   gLasso.selectAll('path').data(P.length>1?[P]:[]).join('path').attr('d',p=>'M'+p.join('L')+(done?'Z':'')).attr('fill','var(--accent)').attr('fill-opacity',0.12).attr('stroke','var(--accent)').attr('stroke-width',2/k).attr('stroke-dasharray',`${4/k} ${3/k}`).style('pointer-events','none');
   const n=inLasso(); document.getElementById('drawInfo').textContent=lassoGeo?`${n.length} îlot(s), ≈${NB}${fmt(d3.sum(n,a=>a.properties.est))}${NB}élèves`:''; }
-document.getElementById('drawApply').onclick=()=>{ const v=document.getElementById('brushSchool').value; inLasso().forEach(a=>assign(a.properties,v)); lasso=[]; lassoGeo=null; drawLasso(); draw(); };
+document.getElementById('drawApply').onclick=()=>{ const v=document.getElementById('brushSchool').value; if(!v){ document.getElementById('drawInfo').textContent='Choisissez d\'abord une école.'; return; } inLasso().forEach(a=>assign(a.properties,v)); lasso=[]; lassoGeo=null; drawLasso(); draw(); };
 document.getElementById('drawCancel').onclick=()=>{ lasso=[]; lassoGeo=null; drawLasso(); };
 seg('mode',setMode);
 function totals(view,lv){ lv=lv||LV;
@@ -440,7 +449,7 @@ function table(){
   names.forEach(n=>{const s=S[n]; const v=tsc[n]||0; const H=X.hist[LV+'|'+n]||{};
     const cap=H.poly?s.clmax:Math.max(s.clmax||0,H.hmax||0)||null;
     const ec=cap&&v?v/cap:null;
-    const pill=s.ferme&&v<1?'<span class="pill full">fermée</span>':(ec>=25?'<span class="pill full">'+fmt1(ec)+'</span>':(ec?fmt1(ec):'–'));
+    const pill=(v<1&&(t26[n]||0)>0)?'<span class="pill full">fermée</span>':(ec>=25?'<span class="pill full">'+fmt1(ec)+'</span>':(ec?fmt1(ec):'–'));
     const site=siteOf(n); let cour='–', ratio='–';
     if(site&&site.non_bati!=null){ cour=fmt(site.non_bati)+(site.avec_dalle>site.non_bati?` · ${fmt(site.avec_dalle)}`:'');
       const el=d3.sum(site.members.filter((m,i,a)=>a.findIndex(x=>x[0]===m[0]&&x[1]===m[1])===i),m=>other[m[0]][m[1]]||0);
@@ -448,7 +457,7 @@ function table(){
       if(site.members.length>1){ const oth=site.members.filter(m=>m[1]!==n).map(m=>m[1]+(m[0]==='mat'?' (mat.)':' (élém.)')); if(oth.length) cour+=`<br><span class="muted small">site partagé avec ${[...new Set(oth)].join(', ')}</span>`; }
     } else if(site&&site.note){ cour=`<span class="muted small">${site.note}</span>`; }
     const hm=H.hmax!=null?`${H.hmax}${H.poly?' (total)':''} <span class="muted small">en ${H.hyear}</span>`:'–';
-    h+=`<tr><td style="white-space:nowrap"><span class="sw" style="background:${col(n)}"></span>${n}</td><td>${fmt(t26[n])}</td><td>${fmt(t27[n])}</td><td><b>${fmt(v)}</b></td><td>${fmt(s.nv)}</td><td>${s.clmax??'–'}</td><td>${hm}</td><td>${cap??'–'}${cap&&s.cap&&s.clmax?`<br><span class="muted small">${fmt(cap*s.cap/s.clmax)}${NB}élèves</span>`:''}</td><td>${(()=>{ if(!(cap&&s.cap&&s.clmax)||(s.ferme&&v<1)) return s.ferme&&v<1?'<span class="pill full">fermée</span>':'–'; const o=v/(cap*s.cap/s.clmax); const p=Math.round(o*100)+NB+'%'; return o>1?`<span class="pill full">! ${p}</span>`:(o>=0.85?`<b>${p}</b>`:p); })()}</td><td>${pill}</td><td>${cour}</td><td>${ratio}</td></tr>`});
+    h+=`<tr><td style="white-space:nowrap"><span class="sw" style="background:${col(n)}"></span>${n}</td><td>${fmt(t26[n])}</td><td>${fmt(t27[n])}</td><td><b>${fmt(v)}</b></td><td>${fmt(s.nv)}</td><td>${s.clmax??'–'}</td><td>${hm}</td><td>${cap??'–'}${cap&&s.cap&&s.clmax?`<br><span class="muted small">${fmt(cap*s.cap/s.clmax)}${NB}élèves</span>`:''}</td><td>${(()=>{ if(!(cap&&s.cap&&s.clmax)||((v<1&&(t26[n]||0)>0))) return (v<1&&(t26[n]||0)>0)?'<span class="pill full">fermée</span>':'–'; const o=v/(cap*s.cap/s.clmax); const p=Math.round(o*100)+NB+'%'; return o>1?`<span class="pill full">! ${p}</span>`:(o>=0.85?`<b>${p}</b>`:p); })()}</td><td>${pill}</td><td>${cour}</td><td>${ratio}</td></tr>`});
   document.getElementById('tbl').innerHTML=h+'</tbody>';
   const nChg=Object.keys(scen[LV]).length;
   document.getElementById('status').textContent=nChg?`${nChg} îlot(s) rattaché(s) à une autre école que celle d'aujourd'hui (${LV==='mat'?'maternelle':'élémentaire'}).`:'Scénario alternatif identique à la situation actuelle : toutes les écoles sont ouvertes.';
@@ -538,7 +547,7 @@ document.getElementById('importScen').onchange=async e=>{
   e.target.value='';
 };
 
-fillBrush(); fillClosing(); fit();
+fillBrush(); fillClosing(); setMode('brush'); fit();
 </script>
 </body>
 </html>
