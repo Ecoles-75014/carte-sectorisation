@@ -33,7 +33,22 @@ svg#map.drawing{cursor:crosshair}
 .closing-list{max-height:210px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;padding:4px 8px}
 .closing-list label{display:flex;gap:6px;align-items:center;font-size:12.5px;padding:2px 0}
 .closing-list label.closed{color:var(--danger)}
-@media (max-width:980px){ #t-carte.on{grid-template-columns:1fr;grid-template-rows:auto} #mapwrap{height:70vh} }
+#t-carte > *{min-width:0}
+.card{min-width:0}
+.seg{flex-wrap:wrap}
+@media (max-width:980px){ #t-carte.on{grid-template-columns:minmax(0,1fr);grid-template-rows:auto} #mapwrap{height:68vh;min-height:420px} }
+@media (max-width:600px){
+  header{padding:10px 12px 0} h1{font-size:18px} header p{font-size:12.5px}
+  nav{flex-wrap:nowrap;overflow-x:auto;padding:8px 12px 0;-webkit-overflow-scrolling:touch} nav button{white-space:nowrap;padding:7px 10px}
+  section.tab{padding:12px 12px 24px}
+  #t-carte.on{gap:12px}
+  .legend{font-size:10.5px;max-width:58%;padding:4px 6px;left:6px;bottom:6px}
+  .zoomctl{right:6px;top:6px}
+  .seg button{padding:6px 8px;font-size:12px}
+  label.chk{font-size:12px}
+  #tbl th,#tbl td{font-size:11.5px;padding:3px 4px}
+  .prose table{font-size:11.5px}
+}
 #mapwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
 svg#map{width:100%;height:100%;display:block;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
 .side{display:flex;flex-direction:column;gap:12px;overflow:auto;min-height:0}
@@ -56,7 +71,8 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 .pill.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
 .pill.close{background:color-mix(in srgb,var(--muted) 20%,transparent);color:var(--muted)}
 .muted{color:var(--muted)} .danger{color:var(--danger)} .small{font-size:12px}
-.legend{position:absolute;left:10px;bottom:10px;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:11.5px;max-width:260px}
+.legend.mini span.muted,.legend.mini br{display:none}
+.legend{cursor:pointer;position:absolute;left:10px;bottom:10px;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:6px;padding:6px 9px;font-size:11.5px;max-width:260px}
 .zoomctl{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:4px}
 .zoomctl button{width:30px;height:30px;font-size:16px}
 .prose{max-width:860px}
@@ -555,6 +571,8 @@ document.getElementById('importScen').onchange=async e=>{
   e.target.value='';
 };
 
+if(window.innerWidth<600){ document.getElementById('cLab').checked=false; document.getElementById('cEff').checked=false; document.getElementById('legend').classList.add('mini'); }
+document.getElementById('legend').addEventListener('click',()=>document.getElementById('legend').classList.toggle('mini'));
 document.getElementById('undoBtn').onclick=undo; document.getElementById('redoBtn').onclick=redo;
 fillBrush(); fillClosing(); setMode('brush'); fit(); updUndo();
 </script>
