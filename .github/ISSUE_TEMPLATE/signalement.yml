@@ -6,7 +6,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        Merci de votre signalement. Ce ticket est **public** : n'y indiquez ni nom d'enfant, ni adresse personnelle, ni numéro de téléphone.
+        Merci de votre signalement. Ce ticket est **public**.
+
+        > [!CAUTION]
+        > **N'indiquez ni nom d'enfant, ni adresse personnelle, ni numéro de téléphone.**
   - type: dropdown
     id: type
     attributes:
