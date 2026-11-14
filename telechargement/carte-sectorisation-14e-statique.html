@@ -602,6 +602,8 @@ document.getElementById('footAbout').onclick=e=>{e.preventDefault(); document.qu
 if(window.innerWidth<600){ document.getElementById('cLab').checked=false; document.getElementById('cEff').checked=false; document.getElementById('legend').classList.add('mini'); }
 document.getElementById('legend').addEventListener('click',()=>document.getElementById('legend').classList.toggle('mini'));
 document.getElementById('undoBtn').onclick=undo; document.getElementById('redoBtn').onclick=redo;
+
+
 fillBrush(); fillClosing(); setMode('brush'); fit(); updUndo();
 </script>
 </body>
