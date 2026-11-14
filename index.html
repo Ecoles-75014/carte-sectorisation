@@ -475,7 +475,7 @@ function fillClosing(){
         let dest=(S[n].ferme&&p.s26===n&&!closed.has(p.s27))?p.s27:nearestOpen(a,closed); assign(p,dest); }); }
     save(); draw();});
 }
-const HELP={brush:'Choisissez une école ci-dessus, puis cliquez sur chaque îlot à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche de l'îlot.',draw:'Choisissez une école, maintenez le bouton enfoncé et tracez un contour à main levée, puis rattachez les îlots qu\'il contient.'};
+const HELP={brush:'Choisissez une école ci-dessus, puis cliquez sur chaque îlot à lui rattacher. Sans école choisie, un clic ouvre seulement la fiche de l\'îlot.',draw:'Choisissez une école, maintenez le bouton enfoncé et tracez un contour à main levée, puis rattachez les îlots qu\'il contient.'};
 function setMode(v){ MODE=v; document.getElementById('modeHelp').textContent=HELP[v]; document.getElementById('drawBar').style.display=v==='draw'?'flex':'none';
   svg.classed('drawing',v==='draw'); if(v==='draw'){ svg.on('.zoom',null); } else { svg.call(zoom); lasso=[]; lassoGeo=null; drawLasso(); } }
 function toGeo(ev){ const [x,y]=d3.pointer(ev,svg.node()); const t=d3.zoomTransform(svg.node()); return proj.invert(t.invert([x,y])); }
