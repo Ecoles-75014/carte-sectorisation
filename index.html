@@ -258,7 +258,7 @@ function draw(){
   const A=DATA[LV].atoms.features;
   const sel=gAtoms.selectAll('path').data(A,d=>d.properties.atom);
   sel.join('path').attr('class','atom').attr('d',path)
-    .attr('fill',d=>col(schoolOf(d))).attr('fill-opacity',GRID==='none'?0.85:0.35)
+    .attr('fill',d=>GRID==='none'?col(schoolOf(d)):'var(--panel)').attr('fill-opacity',GRID==='none'?0.85:1)
     .attr('stroke',d=>d.properties.atom===selected?'var(--ink)':'var(--panel)').attr('stroke-width',0.4)
     .on('mousemove',(e,d)=>{const p=d.properties; const r=document.getElementById('mapwrap').getBoundingClientRect();
       tip.style('display','block').style('left',(e.clientX-r.left+12)+'px').style('top',(e.clientY-r.top+12)+'px')
@@ -274,8 +274,8 @@ function draw(){
       tip.style('display','block').style('left',(e.clientX-r.left+12)+'px').style('top',(e.clientY-r.top+12)+'px')
       .html(`Carreau ${GRID}${NB}m<br>${LV==='mat'?'3-5 ans':'6-10 ans'} INSEE 2019 : ${fmt1(p[LV+'_insee'])}<br>Élèves estimés (public) : ${fmt1(p[key])}<br>Secteur actuel : ${p[LV+'_R26']||'–'}<br>Secteur 2027 : ${p[LV+'_R27']||'–'}`+(GRID==='200'&&p.part_14e<1?`<br><span class="muted">${Math.round(p.part_14e*100)}${NB}% du carreau dans le 14e</span>`:''))})
     .on('mouseleave',()=>tip.style('display','none')).style('pointer-events','all');
-  // filigrane : contours des îlots au-dessus du carroyage
-  gOut.selectAll('path').data(GRID==='none'?[]:A,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke',d=>col(schoolOf(d))).attr('stroke-opacity',0.9).attr('stroke-width',0.9/d3.zoomTransform(svg.node()).k).style('pointer-events','none');
+  // filigrane : contours gris des îlots au-dessus du carroyage
+  gOut.selectAll('path').data(GRID==='none'?[]:A,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke','#8a918e').attr('stroke-opacity',0.85).attr('stroke-width',0.7/d3.zoomTransform(svg.node()).k).style('pointer-events','none');
   // moved outlines
   const M=document.getElementById('cMoved').checked&&VIEW!=='r26'?A.filter(d=>schoolOf(d)!==d.properties.s26):[];
   gMoved.selectAll('path').data(M,d=>d.properties.atom).join('path').attr('d',path).attr('fill','none').attr('stroke','var(--ink)').attr('stroke-width',1.6).attr('stroke-dasharray','3 2').style('pointer-events','none');
@@ -301,7 +301,7 @@ function draw(){
 }
 function legend(mx,cs){
   const L=document.getElementById('legend');
-  if(GRID!=='none'){L.innerHTML=`<b>${LV==='mat'?'Élèves de maternelle':'Élèves d\'élémentaire'} estimés par carreau de ${GRID}${NB}m</b><br><span class="muted">En filigrane : secteurs du scénario affiché.</span><br>`+[0,0.25,0.5,0.75,1].map(t=>`<span class="sw" style="background:${cs(t*mx)}"></span>${fmt1(t*mx)}`).join(' ');return;}
+  if(GRID!=='none'){L.innerHTML=`<b>${LV==='mat'?'Élèves de maternelle':'Élèves d\'élémentaire'} estimés par carreau de ${GRID}${NB}m</b><br><span class="muted">En filigrane : contours des pâtés de maisons.</span><br>`+[0,0.25,0.5,0.75,1].map(t=>`<span class="sw" style="background:${cs(t*mx)}"></span>${fmt1(t*mx)}`).join(' ');return;}
   L.innerHTML=`<b>${VIEW==='r26'?'Secteurs actuels (2026-2027)':VIEW==='r27'?'Secteurs 2027 reconstitués':'Mon scénario'}</b><br><span class="muted">Contour pointillé : îlot qui change d'école. Chiffre sur une flèche : élèves annoncés par la mairie. Cercle vide : école qui ferme.</span>`;
 }
 
