@@ -96,9 +96,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <nav role="tablist">
   <button role="tab" aria-selected="true" data-t="carte">Carte modifiable</button>
   <button role="tab" aria-selected="false" data-t="stats">Statistiques</button>
-  <button role="tab" aria-selected="false" data-t="verif">Vérification des chiffres</button>
-  <button role="tab" aria-selected="false" data-t="flux">Flux : mairie / estimation</button>
-  <button role="tab" aria-selected="false" data-t="rp">Rouvier et Pinard</button>
+  <button role="tab" aria-selected="false" data-t="verif">Fact checking</button>
   <button role="tab" aria-selected="false" data-t="methode">Méthode et limites</button>
   <button role="tab" aria-selected="false" data-t="sources">Sources</button>
   <button role="tab" aria-selected="false" data-t="horsligne">Hors ligne</button>
@@ -159,8 +157,10 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
     </div>
 </section>
 
-<section class="tab prose" id="t-verif">
-<h2>Vérification des chiffres</h2>
+<section class="tab prose" id="t-verif" style="max-width:1100px">
+<h2>Fact checking</h2>
+<p class="small">Dans cet onglet&nbsp;: <a href="#fc-tableaux">tableaux de la mairie et points à faire préciser</a> · <a href="#fluxbox">élèves déplacés, flèche par flèche</a> · <a href="#rpbox">travaux de Rouvier et ouverture de Pinard</a></p>
+<div id="fc-tableaux"></div>
 <p>Les tableaux des présentations GT1&nbsp;A et GT1&nbsp;B ont été ressaisis puis recalculés ligne par ligne. Les calculs sont dans l'ensemble justes, à trois réserves près qui tiennent à la présentation plus qu'au fond.</p>
 <h3>Tableaux « Données écoles et projections » (p.&nbsp;13 et 14, identiques dans les deux présentations)</h3>
 <ul>
@@ -178,13 +178,11 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <h3>Points à faire préciser par la mairie</h3>
 <div class="flag"><b>Base des élèves déplacés.</b> Les flèches comptent des élèves domiciliés, et non des inscrits. Pour Sibelle, les deux chiffres sont proches (77 déplacés pour 75&nbsp;inscrits en maternelle, 147 pour 146 en élémentaire). Pour d'autres écoles, l'écart est net&nbsp;: Alésia (190), 115 déplacés pour 93&nbsp;inscrits&nbsp;; Alésia (188), 193 pour 169&nbsp;; Sarrette (55), 135 pour 104. Selon les échanges avec la mairie, ces chiffres sont des projections de ses services, dont la source et la méthode n'ont pas été communiquées à ce jour. La diapositive Sarrette mentionne par ailleurs «&nbsp;169&nbsp;LS&nbsp;» pour la cour des Ateliers, ce qui laisse penser que des logements à venir sont inclus.</div>
 <div class="flag"><b>« Plein effet » et baisse démographique.</b> Le nouveau secteur additionne l'estimation 2027 et la totalité des élèves déplacés, alors que le plein effet n'est atteint qu'au bout de 3&nbsp;ans en maternelle et de 5&nbsp;ans en élémentaire, période pendant laquelle les projections de la mairie prévoient une baisse de 16 à 21&nbsp;%. D'après les premiers échanges, la baisse serait a priori prise en compte, ce qui reste à confirmer par écrit.</div>
-<div class="flag"><b>Peu de marge dans les écoles d'accueil.</b> Après les mouvements, 14 des 3014&nbsp;écoles d'accueil sur 30 atteignentnbsp;écoles des tableaux de synthèse atteignent le nombre de classes équivalentes égal à leur capacité maximale. En maternelle, ce sont Sarrette (34) 9/9, Jean Dolent 6/6, Hippolyte Maindron 7/7, Maurice d'Ocagne 9/9, Maurice Rouvier 7/7, Chantin (22) 7/7 et Ouest (13) 5/5. En élémentaire, ce sont Arago 11/11, Alain Fournier 10/10, Asseline 8/8, Delambre 9/9, Maurice Rouvier 12/12, Pierre Larousse 10/10 et Chantin (20) 13/13. Les ratios les plus élevés sont ceux de Tombe-Issoire en maternelle (24,9) ainsi que de Ripoche et Chantin (20) (24,5). Pour rappel, les ouvertures et fermetures de classes relèvent de l'Éducation nationale.</div>
+<div class="flag"><b>Peu de marge dans les écoles d'accueil.</b> Après les mouvements, 14 des 30&nbsp;écoles d'accueil des tableaux de synthèse atteignent le nombre de classes équivalentes égal à leur capacité maximale. En maternelle, ce sont Sarrette (34) 9/9, Jean Dolent 6/6, Hippolyte Maindron 7/7, Maurice d'Ocagne 9/9, Maurice Rouvier 7/7, Chantin (22) 7/7 et Ouest (13) 5/5. En élémentaire, ce sont Arago 11/11, Alain Fournier 10/10, Asseline 8/8, Delambre 9/9, Maurice Rouvier 12/12, Pierre Larousse 10/10 et Chantin (20) 13/13. Les ratios les plus élevés sont ceux de Tombe-Issoire en maternelle (24,9) ainsi que de Ripoche et Chantin (20) (24,5). Pour rappel, les ouvertures et fermetures de classes relèvent de l'Éducation nationale.</div>
 <div class="flag"><b>Capacités de la mairie et classes effectivement ouvertes depuis 2009.</b> Les chiffres de l'Éducation nationale montrent que plusieurs écoles ont déjà compté plus de classes que la capacité indiquée par la mairie&nbsp;: Jean Dolent 7 pour 6, Boulard élémentaire 15 pour 12, Pierre Larousse 12 pour 10, Sarrette (55) 7 pour 5, Asseline 9 pour 8, Chantin (20) 14 pour 13 et Maurice Rouvier élémentaire 13 pour 12. À l'inverse, Sarrette (34) n'a jamais dépassé 7&nbsp;classes depuis 2009 alors que le projet lui en attribue 9, et Alésia (12) a culminé à 18&nbsp;classes pour une capacité affichée de 21. Ces capacités résultent d'un décompte fait par la mairie, dont le détail par école (salles comptées, salles affectées au périscolaire) n'a pas été publié.</div>
 <div class="flag"><b>Cours de récréation.</b> La surface non bâtie du 34 rue Sarrette, estimée à partir des données de l'Apur, est d'environ 977&nbsp;m². Elle passerait de 6,9&nbsp;m² par élève (141&nbsp;élèves en 2025) à 4,8&nbsp;m² avec les 203&nbsp;élèves prévus par la mairie. Le tableau sous la carte donne ce ratio pour chaque école et chaque scénario. Ces surfaces restent des estimations, à confirmer par la Ville (DASCO).</div>
 <div class="flag"><b>L'école Pinard n'apparaît dans aucun tableau de synthèse</b>, alors qu'elle ouvre à la rentrée 2027 avec 8&nbsp;classes et qu'une partie des élèves de la ZAC devra être répartie vers Delambre, Boulard, Jean Dolent et Arago, dont plusieurs sont déjà à leur capacité maximale.</div>
-</section>
-<section class="tab prose" id="t-flux"><div id="fluxbox"></div></section>
-<section class="tab prose" id="t-rp">
+<div id="fluxbox"></div><div id="rpbox">
 <h2>Travaux de l'école Maurice Rouvier et ouverture de Pinard</h2>
 <p>Les travaux de Rouvier commencent en 2028, comme l'indique la présentation GT1&nbsp;A (p.&nbsp;33 et 43). Le retour dans l'école rénovée est prévu à la rentrée 2030, si bien que les classes d'élémentaire seraient relogées pendant deux années scolaires, 2028-2029 et 2029-2030. La mairie prévoit ensuite de fermer le site Alésia (190-188) une fois Rouvier réintégré (information recueillie lors des échanges, à confirmer par écrit).</p>
 <h3>Ce que dit la présentation (GT1&nbsp;A, p.&nbsp;33 et 43)</h3>
@@ -224,7 +222,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <li>Questions à poser&nbsp;: la méthode du chiffre de 250&nbsp;élèves (typologie des logements), la répartition des 8&nbsp;classes entre maternelle et élémentaire, l'ouverture progressive ou non dès 2027, et la prise en compte de Pinard dans les tableaux de synthèse.</li>
 </ul>
 <p class="small muted">Sources&nbsp;: paris.fr, «&nbsp;Saint-Vincent-de-Paul, cet ancien hôpital transformé en nouveau quartier&nbsp;»&nbsp;; Conseil de Paris, projet de délibération 2024&nbsp;DU&nbsp;155&nbsp;; Paris &amp; Métropole Aménagement, fiche Saint-Vincent-de-Paul (2019)&nbsp;; mairie du 14e, conseil d'arrondissement du 9&nbsp;juin 2026&nbsp;; INSEE, Filosofi 2019.</p>
-</section>
+</div></section>
 <section class="tab prose" id="t-stats" style="max-width:1100px"><h2>Statistiques</h2>
 <p>Ces tableaux replacent le projet de la mairie dans les tendances démographiques du 14e et le comparent à d'autres arrondissements et à d'autres grandes villes. Ils sont calculés uniquement à partir de données publiques, dont la liste figure sous chaque tableau et dans l'onglet « Sources ». Les chiffres en gras concernent le 14e.</p>
 <h3>Naissances et effectifs dans le 14e</h3>
