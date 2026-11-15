@@ -24,6 +24,7 @@ header p{margin:0;color:var(--muted);max-width:80ch}
 nav{display:flex;gap:4px;padding:10px 20px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
 nav button{font:500 13px var(--body);background:none;border:1px solid transparent;border-bottom:none;padding:8px 12px;border-radius:6px 6px 0 0;color:var(--muted);cursor:pointer}
 nav button[aria-selected="true"]{background:var(--panel);border-color:var(--line);color:var(--ink);margin-bottom:-1px}
+nav button[data-t="signal"],nav button[data-t="signal"][aria-selected="true"]{color:var(--danger);font-weight:600}
 nav button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 section.tab{display:none;padding:16px 20px 28px}
 section.tab.on{display:block}
@@ -94,10 +95,10 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 </header>
 <nav role="tablist">
   <button role="tab" aria-selected="true" data-t="carte">Carte modifiable</button>
+  <button role="tab" aria-selected="false" data-t="stats">Statistiques</button>
   <button role="tab" aria-selected="false" data-t="verif">Vérification des chiffres</button>
   <button role="tab" aria-selected="false" data-t="flux">Flux : mairie / estimation</button>
   <button role="tab" aria-selected="false" data-t="rp">Rouvier et Pinard</button>
-  <button role="tab" aria-selected="false" data-t="stats">Statistiques</button>
   <button role="tab" aria-selected="false" data-t="methode">Méthode et limites</button>
   <button role="tab" aria-selected="false" data-t="sources">Sources</button>
   <button role="tab" aria-selected="false" data-t="horsligne">Hors ligne</button>
@@ -185,7 +186,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <section class="tab prose" id="t-flux"><div id="fluxbox"></div></section>
 <section class="tab prose" id="t-rp">
 <h2>Travaux de l'école Maurice Rouvier et ouverture de Pinard</h2>
-<p>Les travaux de Rouvier commencent en 2028, comme l'indique la présentation GT1&nbsp;A (p.&nbsp;33 et 43). Le retour dans l'école rénovée est prévu à la rentrée 2030, si bien que les classes d'élémentaire seraient relogées pendant deux années scolaires, 2028-2029 et 2029-2030. La mairie prévoit ensuite de fermer le site Alésia une fois Rouvier réintégré (information recueillie lors des échanges, à confirmer par écrit).</p>
+<p>Les travaux de Rouvier commencent en 2028, comme l'indique la présentation GT1&nbsp;A (p.&nbsp;33 et 43). Le retour dans l'école rénovée est prévu à la rentrée 2030, si bien que les classes d'élémentaire seraient relogées pendant deux années scolaires, 2028-2029 et 2029-2030. La mairie prévoit ensuite de fermer le site Alésia (190-188) une fois Rouvier réintégré (information recueillie lors des échanges, à confirmer par écrit).</p>
 <h3>Ce que dit la présentation (GT1&nbsp;A, p.&nbsp;33 et 43)</h3>
 <ul>
 <li>Le groupe scolaire Rouvier compte 7&nbsp;classes en maternelle et 12 en élémentaire à la rentrée 2026, et doit faire l'objet d'une rénovation complète.</li>
