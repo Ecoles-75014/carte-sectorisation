@@ -15,6 +15,6 @@ Les données produites dérivent de bases de la Ville de Paris et de l'Apur diff
 - Secteurs scolaires, établissements scolaires, arrondissements : Ville de Paris (DASCO), opendata.paris.fr, 2026, sous licence ODbL.
 - Emprises des équipements et emprise bâtie : Apur, opendata.apur.org, 2026, sous licence ODbL.
 - Données carroyées Filosofi 2019 : Source : Insee, Licence Ouverte 2.0.
-- BD TOPO et géocodage : IGN, Géoplateforme, Licence Ouverte 2.0.
+- BD TOPO (bâtiments, tracé et noms des rues) et géocodage : IGN, Géoplateforme, Licence Ouverte 2.0.
 - Effectifs d'élèves par école et annuaire de l'éducation : ministère de l'Éducation nationale (DEPP), Licence Ouverte 2.0.
 - Présentations GT1 A et GT1 B : mairie du 14e arrondissement, novembre 2026 (non ouvertes ; chiffres cités, documents non reproduits).
