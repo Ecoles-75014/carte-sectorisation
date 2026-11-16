@@ -5,7 +5,7 @@ Ce dépôt est publié par le **Collectif écoles du 14ème en lutte**. La carte
 | Contenu | Licence |
 |---|---|
 | Code de la page (`index.html`, hors données intégrées) | MIT (voir `LICENSE`) |
-| Données produites pour la carte : secteurs 2027 reconstitués, îlots, carroyage à 100 m, flux estimés, surfaces de cour estimées | [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/) |
+| Données produites pour la carte : secteurs 2027 reconstitués, îlots, flux estimés, surfaces de cour estimées | [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/1-0/) |
 | Textes, analyses et tableaux | [Creative Commons BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.fr), en citant « Collectif écoles du 14ème en lutte » |
 
 Les données produites dérivent de bases de la Ville de Paris et de l'Apur diffusées sous ODbL : toute base dérivée doit être rediffusée sous ODbL, en citant les sources.
