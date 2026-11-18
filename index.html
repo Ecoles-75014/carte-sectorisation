@@ -187,7 +187,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
   <div class="side">
     <div class="card">
       <h2>Indicateur</h2>
-      <div class="seg" id="pind"><button aria-pressed="true" data-v="nb">Nombre d'enfants</button><button aria-pressed="false" data-v="enf">Part d'enfants</button><button aria-pressed="false" data-v="tot">Élèves / enfants</button><button aria-pressed="false" data-v="eco">Écoles / 1 000 enfants</button><button aria-pressed="false" data-v="tai">Élèves par école</button><button aria-pressed="false" data-v="occ">Classes / maximum</button><button aria-pressed="false" data-v="pub">Part du public</button></div>
+      <div class="seg" id="pind"><button aria-pressed="true" data-v="nb">Nombre d'enfants</button><button aria-pressed="false" data-v="enf">Part d'enfants</button><button aria-pressed="false" data-v="tot">Élèves / enfants</button><button aria-pressed="false" data-v="eco">Écoles publiques / 1 000 enfants</button><button aria-pressed="false" data-v="ecT">Toutes écoles / 1 000 enfants</button><button aria-pressed="false" data-v="tai">Élèves par école publique</button><button aria-pressed="false" data-v="occ">Classes / maximum</button><button aria-pressed="false" data-v="pub">Part du public</button></div>
       <h3 class="small" style="margin:10px 0 4px;font-weight:600">Année</h3>
       <div class="seg" id="pyr"></div>
       <p class="small muted" id="pindhelp" style="margin:8px 0 0"></p>
@@ -201,11 +201,12 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
     <li>Part d'enfants&nbsp;: enfants de 2 à 10&nbsp;ans habitant l'arrondissement, rapportés à sa population, selon les recensements de 2010, 2015, 2020 et 2023 de l'INSEE (il n'existe pas de série annuelle à cette échelle, et 2023 est le dernier recensement publié).</li>
     <li>Élèves&nbsp;: élèves des écoles maternelles, élémentaires et primaires situées dans l'arrondissement, publiques et privées sous contrat, quel que soit leur domicile (DEPP, rentrées 2010 à 2025), y compris les élèves des ULIS. Les écoles hors contrat n'y figurent pas.</li>
     <li>Élèves pour 100 enfants&nbsp;: élèves d'une rentrée rapportés aux enfants recensés la même année (2010, 2015, 2020 ou 2023). Au-dessus de 100, l'arrondissement scolarise plus d'enfants qu'il n'en loge, en accueillant des élèves d'autres arrondissements. Les enfants de 2&nbsp;ans, rarement scolarisés, tirent ce ratio vers le bas partout de la même façon.</li>
-    <li>Écoles pour 1&nbsp;000 enfants&nbsp;: écoles publiques de l'arrondissement rapportées aux enfants de 2 à 10&nbsp;ans qui y habitent. Comme dans l'onglet Statistiques, la dernière année rapporte les écoles de 2025 aux enfants du recensement 2023&nbsp;; l'évolution est donnée en %.</li>
+    <li>Écoles publiques pour 1&nbsp;000 enfants&nbsp;: écoles publiques de l'arrondissement rapportées aux enfants de 2 à 10&nbsp;ans qui y habitent. Comme dans l'onglet Statistiques, la dernière année rapporte les écoles de 2025 aux enfants du recensement 2023&nbsp;; l'évolution est donnée en %.</li>
+    <li>Toutes écoles pour 1&nbsp;000 enfants&nbsp;: même calcul en ajoutant les écoles privées sous contrat (les écoles hors contrat n'y figurent pas).</li>
     <li>Taille moyenne des écoles&nbsp;: élèves des écoles publiques divisés par le nombre d'écoles publiques, à chaque rentrée (comme la colonne «&nbsp;Élèves par école publique&nbsp;» de l'onglet Statistiques)&nbsp;; l'évolution est donnée en %.</li>
     <li>Classes / maximum&nbsp;: classes des écoles publiques ouvertes une année donnée, rapportées à la somme, pour ces mêmes écoles, du plus grand nombre de classes atteint entre 2009 et 2025 (même calcul que la colonne «&nbsp;Classes 2025 / maximum&nbsp;» de l'onglet Statistiques)&nbsp;; l'évolution est donnée en points.</li>
     <li>Part du public&nbsp;: élèves des écoles publiques pour 100 élèves des écoles publiques et privées sous contrat de l'arrondissement (rentrées 2010, 2015, 2020 et 2025).</li>
-    <li>Évolution&nbsp;: variation en % pour le nombre d'enfants, les écoles pour 1&nbsp;000 enfants et la taille des écoles, écart en points pour les quatre taux en %, entre 2010 et la dernière année disponible (2023 pour les deux mesures issues du recensement, 2025 pour la part du public). La valeur la plus forte est en vert, la plus faible en rouge.</li>
+    <li>Évolution&nbsp;: variation en % pour le nombre d'enfants, les écoles pour 1&nbsp;000 enfants (publiques ou toutes) et la taille des écoles, écart en points pour les quatre taux en %, entre 2010 et la dernière année disponible (2023 pour les deux mesures issues du recensement, 2025 pour la part du public). La valeur la plus forte est en vert, la plus faible en rouge.</li>
     <li>Couleurs&nbsp;: du rouge (valeur la plus faible) au vert (valeur la plus forte), en passant par le jaune, sauf pour la taille des écoles, où les plus petites écoles sont en vert et les plus grandes en rouge. La valeur est écrite sur chaque arrondissement.</li>
     <li>Sources&nbsp;: INSEE, recensements 2010, 2015 et 2020 (bases infracommunales «&nbsp;Diplômes-Formation&nbsp;» et bases communales «&nbsp;Évolution et structure de la population&nbsp;») et 2023 (DS_RP_EDUCATION_PRINC et DS_RP_POPULATION_PRINC)&nbsp;; DEPP, effectifs d'élèves et nombre de classes par école, rentrées 2009 à 2025&nbsp;; IGN, ADMIN EXPRESS (contours des arrondissements).</li>
     </ul>
@@ -685,7 +686,9 @@ const PIND={
        help:y=>`Élèves des écoles publiques et privées sous contrat de l'arrondissement (rentrée ${y}), pour 100 enfants de 2 à 10${NB}ans qui y habitent (recensement ${y}).`},
   eco:{lab:'Écoles publiques pour 1 000 enfants',years:[2010,2015,2020,2025],rel:true,f:(a,y)=>1000*a.ecp[PY.indexOf(y)]/pR(a,y===2025?2023:y,'ce'),fmt:pfmt2,
        help:y=>`Écoles publiques de l'arrondissement (rentrée ${y}) pour 1${NB}000 enfants de 2 à 10${NB}ans qui y habitent (recensement ${y==='2010 et 2025'?'2010 et 2023':(y===2025?2023:y)}).`},
-  tai:{lab:'Taille moyenne des écoles publiques (élèves par école)',years:[2010,2015,2020,2025],rel:true,inv:true,f:(a,y)=>a.pub[PY.indexOf(y)]/a.ecp[PY.indexOf(y)],fmt:v=>fmt(v),
+  ecT:{lab:'Toutes écoles (publiques et privées sous contrat) pour 1 000 enfants',years:[2010,2015,2020,2025],rel:true,f:(a,y)=>{const i=PY.indexOf(y); return 1000*(a.ecp[i]+a.ecv[i])/pR(a,y===2025?2023:y,'ce');},fmt:pfmt2,
+       help:y=>`Écoles publiques et privées sous contrat de l'arrondissement (rentrée ${y}) pour 1${NB}000 enfants de 2 à 10${NB}ans qui y habitent (recensement ${y==='2010 et 2025'?'2010 et 2023':(y===2025?2023:y)}).`},
+  tai:{lab:'Taille moyenne des écoles publiques (élèves par école publique)',years:[2010,2015,2020,2025],rel:true,inv:true,f:(a,y)=>a.pub[PY.indexOf(y)]/a.ecp[PY.indexOf(y)],fmt:v=>fmt(v),
        help:y=>`Élèves des écoles publiques de l'arrondissement divisés par le nombre de ces écoles (rentrée ${y}).`},
   occ:{lab:'Classes ouvertes rapportées au maximum 2009-2025',years:[2010,2015,2020,2025],f:(a,y)=>{const i=PY.indexOf(y); return 100*a.cl[i]/a.cm[i];},fmt:pfmt,
        help:y=>`Classes des écoles publiques de l'arrondissement (rentrée ${y}), rapportées à la somme, pour ces mêmes écoles, du plus grand nombre de classes atteint entre 2009 et 2025.`},
@@ -718,7 +721,7 @@ function pdraw(){
     .on('mousemove',(e,d)=>{const a=d.properties, r=document.getElementById('pmapwrap').getBoundingClientRect();
       const row=(k)=>{const J=PIND[k], L=J.years[J.years.length-1]; return `${J.lab} : ${J.fmt(J.f(a,L))} en ${L} (${pEvoF(J,pEvo(J,a))} depuis ${J.years[0]})`;};
       ptip.style('display','block').style('left',(e.clientX-r.left+12)+'px').style('top',(e.clientY-r.top+12)+'px')
-      .html(`<b>${pnom(a.n)}</b><br>${['nb','enf','tot','eco','tai','occ','pub'].map(row).join('<br>')}<br><span class="muted">Cliquer pour voir l'évolution</span>`);})
+      .html(`<b>${pnom(a.n)}</b><br>${['nb','enf','tot','eco','ecT','tai','occ','pub'].map(row).join('<br>')}<br><span class="muted">Cliquer pour voir l'évolution</span>`);})
     .on('mouseleave',()=>ptip.style('display','none'))
     .on('click',(e,d)=>{ PSEL=PSEL===d.properties.n?0:d.properties.n; pdraw(); });
   pgA.selectAll('path').filter(d=>d.properties.n===PSEL).raise();
@@ -734,10 +737,10 @@ function pdraw(){
   const pv=k=>{const J=PIND[k], L=J.years[J.years.length-1];
     if(PYR==='evo') return pEvoF(J,pEvo(J,PARIS));
     const y=PYR==='last'?L:+PYR; return J.fmt(J.f(PARIS,y));};
-  const pl={occ:'des classes ouvertes par rapport au maximum 2009-2025',tai:'élèves par école publique',eco:'écoles publiques pour 1'+NB+'000 enfants',nb:'enfants de 2 à 10'+NB+'ans',enf:'d\'enfants de 2 à 10'+NB+'ans dans la population',tot:'d\'élèves scolarisés par rapport aux enfants domiciliés',pub:'des élèves dans le public'};
+  const pl={ecT:'écoles publiques et privées pour 1'+NB+'000 enfants',occ:'des classes ouvertes par rapport au maximum 2009-2025',tai:'élèves par école publique',eco:'écoles publiques pour 1'+NB+'000 enfants',nb:'enfants de 2 à 10'+NB+'ans',enf:'d\'enfants de 2 à 10'+NB+'ans dans la population',tot:'d\'élèves scolarisés par rapport aux enfants domiciliés',pub:'des élèves dans le public'};
   const per=PYR==='evo'?'évolution depuis 2010':(PYR==='last'?'dernière année : 2023 pour le recensement, 2025 pour les écoles':PYR);
   document.getElementById('plegend').innerHTML=`<b>${ptitle()}</b><br>`+st.map(v=>`<span class="sw" style="background:${sc(v)}"></span>${pvfmt(v)}`).join(' ')
-    +`<div style="margin-top:5px;border-top:1px solid var(--line);padding-top:4px"><b>Paris entier</b> <span class="muted">(${per})</span>`+['nb','enf','tot','eco','tai','occ','pub'].map(k=>`<br><span style="font-weight:${PK===k?700:400}">${pv(k)} ${pl[k]}</span>`).join('')
+    +`<div style="margin-top:5px;border-top:1px solid var(--line);padding-top:4px"><b>Paris entier</b> <span class="muted">(${per})</span>`+['nb','enf','tot','eco','ecT','tai','occ','pub'].map(k=>`<br><span style="font-weight:${PK===k?700:400}">${pv(k)} ${pl[k]}</span>`).join('')
     +`<br><span class="muted">${PIND[PK].inv?'Vert : valeur la plus faible · rouge : la plus forte.':'Rouge : valeur la plus faible · vert : la plus forte.'}</span></div>`;
   document.getElementById('pindhelp').textContent=PYR==='evo'?`${I.rel?'Évolution en %':'Écart en points'} entre ${Y[0]} et ${Y[Y.length-1]}. `+I.help(`${Y[0]} et ${Y[Y.length-1]}`):I.help(pyear());
   pdetail();
