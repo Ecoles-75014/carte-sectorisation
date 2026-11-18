@@ -668,7 +668,7 @@ function pdraw(){
   // légende : dégradé et valeurs de Paris entier
   const dom=sc.domain(), st=I.div?[dom[0],(dom[0]+dom[1])/2,dom[1],(dom[1]+dom[2])/2,dom[2]]:[0,.25,.5,.75,1].map(t=>dom[0]+t*(dom[1]-dom[0]));
   document.getElementById('plegend').innerHTML=`<b>${I.lab}</b><br>`+st.map(v=>`<span class="sw" style="background:${sc(v)}"></span>${I.fmt(v)}`).join(' ')
-    +`<div style="margin-top:5px;border-top:1px solid var(--line);padding-top:4px"><b>Paris entier</b> : ${fmt(PARIS.enf)}${NB}enfants de 2 à 10${NB}ans · ${pfmt(PIND.tot.f(PARIS))} d'élèves scolarisés · ${pfmt(PIND.pub.f(PARIS))} dans le public${I.div?' <span class="muted">(jaune = moyenne de Paris)</span>':''}</div>`;
+    +`<div style="margin-top:5px;border-top:1px solid var(--line);padding-top:4px"><b>Paris entier</b> : ${fmt(PARIS.enf)}${NB}enfants de 2 à 10${NB}ans · ${fmt(PIND.tot.f(PARIS))} élèves scolarisés pour 100 enfants, dont ${fmt(PIND.pub.f(PARIS))} dans le public (2023)${I.div?' <span class="muted">(jaune = moyenne de Paris)</span>':''}</div>`;
   document.getElementById('pindhelp').textContent=I.help;
   pdetail();
 }
