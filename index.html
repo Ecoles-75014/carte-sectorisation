@@ -747,18 +747,27 @@ function pdraw(){
 }
 const pev=(a,b)=>{const x=100*(b-a)/a; return (x>0?'+':x<0?'−':'')+fmt(Math.abs(x))+NB+'%';};
 function pdetail(){
-  const a=PD.arr[PSEL], EY=[2010,2015,2020,2025], el=y=>pE(a,y), ec=y=>a.ecp[PY.indexOf(y)];
-  const td=v=>`<td>${v}</td>`;
+  // Les tableaux reprennent automatiquement toutes les cartes de PIND (une ligne par carte, libellé du bouton),
+  // rangées selon leurs années : recensement (2010-2023) ou rentrée (2010-2025). Ajouter ou retirer une carte
+  // dans PIND et dans #pind suffit à mettre ces tableaux à jour.
+  const a=PD.arr[PSEL], EY=[2010,2015,2020,2025], ix=y=>PY.indexOf(y);
+  const td=v=>`<td>${v}</td>`, dn=d=>d>0?'+'+fmt(d):d<0?'−'+fmt(-d):'=';
+  const blab=k=>{const b=document.querySelector(`#pind button[data-v="${k}"]`); return b?b.textContent:PIND[k].lab;};
+  const raw={rec:[
+      {l:'Habitants (milliers)',v:y=>fmt1(pR(a,y,'pc')/1000),e:()=>pev(pR(a,2010,'pc'),pR(a,2023,'pc'))}],
+    ren:[
+      {l:'Élèves du public',v:y=>fmt(a.pub[ix(y)]),e:()=>pev(a.pub[ix(2010)],a.pub[ix(2025)])},
+      {l:'Élèves du privé',v:y=>fmt(a.priv[ix(y)]),e:()=>pev(a.priv[ix(2010)],a.priv[ix(2025)])},
+      {l:'Écoles publiques',v:y=>fmt(a.ecp[ix(y)]),e:()=>dn(a.ecp[ix(2025)]-a.ecp[ix(2010)])},
+      {l:'Écoles privées sous contrat',v:y=>fmt(a.ecv[ix(y)]),e:()=>dn(a.ecv[ix(2025)]-a.ecv[ix(2010)])}]};
+  const ind=last=>Object.keys(PIND).filter(k=>{const Y=PIND[k].years; return Y[Y.length-1]===last;})
+    .map(k=>{const J=PIND[k]; return {l:blab(k),k,v:y=>J.fmt(J.f(a,y)),e:()=>pEvoF(J,pEvo(J,a))};});
+  const table=(head,Y,rows)=>`<table class="pkv" style="margin-top:6px"><tr><th>${head}</th>${Y.map(y=>`<th>${y}</th>`).join('')}<th>Évol.</th></tr>`
+    +rows.map(r=>`<tr${r.k===PK?' style="font-weight:700"':''}><td>${r.l}</td>${Y.map(y=>td(r.v(y))).join('')}${td(r.e())}</tr>`).join('')+`</table>`;
   document.getElementById('pdetail').innerHTML=`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="margin:0">${pnom(a.n)}</h2>${PSEL?'<button class="btn" id="pback">Paris entier</button>':'<span class="small muted">Cliquez sur un arrondissement</span>'}</div>
-  <table class="pkv" style="margin-top:8px"><tr><th>Recensement</th>${PR.map(y=>`<th>${y}</th>`).join('')}<th>Évol.</th></tr>
-  <tr><td>Habitants (milliers)</td>${PR.map(y=>td(fmt1(pR(a,y,'pc')/1000))).join('')}${td(pev(pR(a,2010,'pc'),pR(a,2023,'pc')))}</tr>
-  <tr><td>Enfants 2-10${NB}ans</td>${PR.map(y=>td(fmt(pR(a,y,'ce')))).join('')}${td(pev(pR(a,2010,'ce'),pR(a,2023,'ce')))}</tr>
-  <tr><td>Part des enfants</td>${PR.map(y=>td(pfmt1(PIND.enf.f(a,y)))).join('')}${td(ppt(PIND.enf.f(a,2023)-PIND.enf.f(a,2010)))}</tr></table>
-  <table class="pkv" style="margin-top:6px"><tr><th>Rentrée</th>${EY.map(y=>`<th>${y}</th>`).join('')}<th>Évol.</th></tr>
-  <tr><td>Élèves du public</td>${EY.map(y=>td(fmt(a.pub[PY.indexOf(y)]))).join('')}${td(pev(a.pub[PY.indexOf(2010)],a.pub[PY.indexOf(2025)]))}</tr>
-  <tr><td>Élèves du privé</td>${EY.map(y=>td(fmt(a.priv[PY.indexOf(y)]))).join('')}${td(pev(a.priv[PY.indexOf(2010)],a.priv[PY.indexOf(2025)]))}</tr>
-  <tr><td>Part du public</td>${EY.map(y=>td(pfmt(PIND.pub.f(a,y)))).join('')}${td(ppt(PIND.pub.f(a,2025)-PIND.pub.f(a,2010)))}</tr>
-  <tr><td>Écoles publiques</td>${EY.map(y=>td(fmt(ec(y)))).join('')}${td(((d)=>d>0?'+'+d:d<0?'−'+(-d):'=')(ec(2025)-ec(2010)))}</tr></table>
+  ${table('Recensement',PR,[...raw.rec,...ind(2023)])}
+  ${table('Rentrée',EY,[...raw.ren,...ind(2025)])}
+  <p class="small muted" style="margin:4px 0 0">En gras : la carte affichée. Les écoles pour 1${NB}000 enfants de 2025 utilisent les enfants du recensement 2023.</p>
   <h3 class="small" style="margin:12px 0 0;font-weight:600">Évolution depuis ${PY[0]}</h3>
   <div class="pser"><span><i style="background:var(--s1)"></i>Élèves du public</span><span><i style="background:var(--s2)"></i>Élèves du privé</span><span><i style="background:var(--s3)"></i>Enfants de 2 à 10${NB}ans domiciliés</span></div>
   <div style="position:relative"><svg id="pchart" width="100%" height="210" role="img" aria-label="Évolution des élèves et des enfants"></svg><div class="tip" id="pctip"></div></div>
