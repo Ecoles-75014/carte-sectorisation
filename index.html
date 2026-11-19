@@ -684,9 +684,9 @@ const pE=(a,y)=>{const i=PY.indexOf(y); return a.pub[i]+a.priv[i];};
 const pR=(a,y,k)=>a[k][PR.indexOf(y)];
 // année « dernière » de chaque carte : recensement 2023 pour les deux premières, rentrée 2025 pour la part du public
 const PIND={
-  nb:{lab:'Enfants de 2 à 10 ans domiciliés',years:[2010,2015,2020,2023],rel:true,f:(a,y)=>pR(a,y,'ce'),fmt:v=>fmt(v),
+  nb:{lab:'Enfants de 2 à 10 ans domiciliés',years:[2010,2015,2020,2023],rel:true,abs:20,f:(a,y)=>pR(a,y,'ce'),fmt:v=>fmt(v),
        help:y=>`Nombre d'enfants de 2 à 10${NB}ans habitant l'arrondissement (recensement ${y}).`},
-  nai:{lab:'Naissances domiciliées',years:[2010,2015,2020,2025],rel:true,f:(a,y)=>a.nai[PY.indexOf(y)],fmt:v=>fmt(v),
+  nai:{lab:'Naissances domiciliées',years:[2010,2015,2020,2025],rel:true,abs:20,f:(a,y)=>a.nai[PY.indexOf(y)],fmt:v=>fmt(v),
        help:y=>`Enfants nés dans l'année ${y} de mères domiciliées dans l'arrondissement, quel que soit le lieu de l'accouchement (état civil). Ce sont les élèves de petite section trois ans plus tard.`},
   enf:{lab:'Part des enfants de 2 à 10 ans dans la population',years:[2010,2015,2020,2023],f:(a,y)=>100*pR(a,y,'ce')/pR(a,y,'pc'),fmt:pfmt1,
        help:y=>`Enfants de 2 à 10${NB}ans habitant l'arrondissement, pour 100 habitants (recensement ${y} ; 2023 est le dernier recensement publié).`},
@@ -706,7 +706,7 @@ const PIND={
 const PIY=PD.ilYears, PER={2019:[2016,2019],2025:[2022,2025]};
 const pAvg=(a,k,y0,y1)=>{const v=PIY.map((y,i)=>y>=y0&&y<=y1?a[k][i]:null).filter(x=>x!=null); return v.length?d3.mean(v):null;};
 Object.assign(PIND,{
-  inv:{lab:'Investissements localisés dans les écoles (M€ constants 2025 par an)',years:[2019,2025],ylab:y=>PER[y].join('-'),rel:true,tab:'inv',
+  inv:{lab:'Investissements localisés dans les écoles (M€ constants 2025 par an)',years:[2019,2025],ylab:y=>PER[y].join('-'),rel:true,abs:17,tab:'inv',
        f:(a,y)=>pAvg(a,'ie',...PER[y])/1e6,fmt:v=>fmt1(v)+NB+'M€',
        help:y=>`Moyenne annuelle ${typeof y==='number'?PER[y].join('-'):y} des travaux payés par la Ville dans les écoles de l'arrondissement (entretien, grands projets et budget participatif), en euros constants 2025. Paris Centre (1er-4e) est publié d'un seul tenant depuis 2020.`},
   invp:{lab:'Part des investissements localisés de l\'arrondissement consacrée aux écoles',years:[2019,2025],ylab:y=>PER[y].join('-'),noEvo:true,tab:'inv',
@@ -725,7 +725,11 @@ const pproj=d3.geoMercator(), ppath=d3.geoPath(pproj);
 const PFC={type:'FeatureCollection',features:PD.arr.slice(1).map(a=>({type:'Feature',properties:a,geometry:a.g}))};
 const ptip=d3.select('#ptip');
 // couleurs : rouge = minimum, vert = maximum, sauf pour la taille des écoles (inv) où l'ordre est inversé
-function pscale(){ const v=PD.arr.slice(1).map(pval), inv=PIND[PK].inv; return d3.scaleSequential([d3.min(v),d3.max(v)],inv?t=>d3.interpolateRdYlGn(1-t):d3.interpolateRdYlGn); }
+// valeur de référence (jaune) : Paris entier, ou moyenne par arrondissement pour un nombre absolu ; en vue « évolution », l'évolution de Paris
+function pmid(){ const I=PIND[PK]; if(pIsEvo()) return pEvo(I,PARIS); const v=I.f(PARIS,pyear()); return I.abs?v/I.abs:v; }
+function pscale(){ const v=PD.arr.slice(1).map(pval), inv=PIND[PK].inv, lo=d3.min(v), hi=d3.max(v), e=(hi-lo)*1e-6||1e-6;
+  const mid=Math.min(hi-e,Math.max(lo+e,pmid()));
+  return d3.scaleDiverging([lo,mid,hi],inv?t=>d3.interpolateRdYlGn(1-t):d3.interpolateRdYlGn); }
 // cartouche en haut à gauche : titre de la carte et phrase explicative
 function ptitleDraw(){ const I=PIND[PK], Y=I.years;
   document.getElementById('ptitle').innerHTML=`<b>${ptitle()}</b><p id="pindhelp"></p>`;
@@ -764,7 +768,7 @@ function pdraw(){
   tg.select('tspan.a').attr('x',d=>d.c[0]).attr('y',d=>d.v?d.c[1]-2:d.c[1]+4).attr('font-weight',700).text(d=>d.n===1?'1er':d.n+'e');
   tg.select('tspan.b').attr('x',d=>d.c[0]).attr('dy','1.15em').text(d=>d.v);
   // légende : dégradé, puis valeurs de Paris entier pour la même année (ou la même évolution)
-  const dom=sc.domain(), st=[0,.25,.5,.75,1].map(t=>dom[0]+t*(dom[1]-dom[0]));
+  const dom=sc.domain(), st=[dom[0],(dom[0]+dom[1])/2,dom[1],(dom[1]+dom[2])/2,dom[2]];
   const pv=k=>{const J=PIND[k], L=J.years[J.years.length-1];
     if(PYR==='evo') return J.noEvo?'–':pEvoF(J,pEvo(J,PARIS));
     const y=PYR==='last'?L:+PYR; return J.years.includes(y)?J.fmt(J.f(PARIS,y)):'–';};
@@ -773,7 +777,7 @@ function pdraw(){
   ptitleDraw();
   document.getElementById('plegend').innerHTML=`<h3 class="small" style="margin:0 0 6px;font-weight:600">Légende</h3>`+st.map(v=>`<span class="sw" style="background:${sc(v)}"></span>${pvfmt(v)}`).join(' ')
     +`<div style="margin-top:5px;border-top:1px solid var(--line);padding-top:4px"><b>Paris entier</b> <span class="muted">(${per})</span>`+Object.keys(PIND).map(k=>`<br><span style="font-weight:${PK===k?700:400}">${pv(k)} ${pl[k]}</span>`).join('')
-    +`<br><span class="muted">${PIND[PK].inv?'Vert : valeur la plus faible · rouge : la plus forte.':'Rouge : valeur la plus faible · vert : la plus forte.'}</span></div>`
+    +`<br><span class="muted">Jaune : ${pIsEvo()?'évolution de Paris':(PIND[PK].abs?'moyenne par arrondissement':'Paris entier')} (${pvfmt(pmid())}) ; ${PIND[PK].inv?'vert en dessous, rouge au-dessus':'vert au-dessus, rouge en dessous'}.</span></div>`
     +`<p class="small muted" style="margin:6px 0 0;border-top:1px solid var(--line);padding-top:4px">Sources : INSEE (recensements 2010, 2015, 2020 et 2023 ; état civil 2010-2025), DEPP (effectifs et classes par école, rentrées 2009-2025), IGN (ADMIN EXPRESS). Détail dans l'onglet « Méthode et sources ».</p>`;
   pdetail();
 }
