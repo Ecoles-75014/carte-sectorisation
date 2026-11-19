@@ -44,6 +44,9 @@ svg#map.drawing{cursor:crosshair}
 #pmapwrap{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
 #pmap{width:100%;height:100%;display:block}
 #pnote{grid-column:1 / -1}
+.pcart{position:absolute;left:10px;top:10px;max-width:min(400px,55%);background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:6px;padding:8px 11px;font-size:13px;line-height:1.35}
+.pcart p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+#plegend .sw{margin-left:2px}
 #pdetail{grid-column:1 / -1}
 .pdgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:start}
 @media (max-width:980px){.pdgrid{grid-template-columns:minmax(0,1fr);gap:8px}}
@@ -52,7 +55,7 @@ svg#map.drawing{cursor:crosshair}
 .card{min-width:0}
 .seg{flex-wrap:wrap}
 @media (max-width:980px){ #t-carte.on,#t-paris.on{grid-template-columns:minmax(0,1fr);grid-template-rows:auto} #pmapwrap{height:68vh;min-height:420px}
-@media (max-width:600px){ .pkv{font-size:10.5px} .pkv th:first-child,.pkv td:first-child{width:25%} #pmapwrap{height:auto;min-height:0} #pmap{height:auto;aspect-ratio:1.25} #plegend{position:static;max-width:none;border:0;border-top:1px solid var(--line);border-radius:0;background:var(--panel)} } #mapwrap{height:68vh;min-height:420px} }
+@media (max-width:600px){ .pkv{font-size:10.5px} .pkv th:first-child,.pkv td:first-child{width:25%} #pmapwrap{height:auto;min-height:0} #pmap{height:auto;aspect-ratio:1.25} #pmapwrap{display:flex;flex-direction:column} #ptitle{order:-1;position:static;max-width:none;border:0;border-bottom:1px solid var(--line);border-radius:0} } #mapwrap{height:68vh;min-height:420px} }
 @media (max-width:600px){
   header{padding:10px 12px 0} h1{font-size:18px} header p{font-size:12.5px}
   nav{flex-wrap:wrap;gap:2px;padding:8px 12px 0} nav button{white-space:nowrap;padding:6px 8px;font-size:12.5px} nav button[aria-selected="true"]{margin-bottom:0;border-bottom:1px solid var(--line);border-radius:6px}
@@ -184,7 +187,7 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
 <section class="tab" id="t-paris">
   <div id="pmapwrap">
     <svg id="pmap" role="img" aria-label="Carte de Paris par arrondissement"></svg>
-    <div class="legend" id="plegend" style="cursor:default"></div>
+    <div class="pcart" id="ptitle"></div>
     <div class="tip" id="ptip"></div>
   </div>
   <div class="side">
@@ -193,8 +196,8 @@ th{font-weight:600;color:var(--muted);font-size:11.5px}
       <div class="seg" id="pind"><button aria-pressed="true" data-v="nb">Nombre d'enfants</button><button aria-pressed="false" data-v="nai">Naissances</button><button aria-pressed="false" data-v="enf">Part d'enfants</button><button aria-pressed="false" data-v="tot">Élèves / enfants</button><button aria-pressed="false" data-v="eco">Écoles publiques / 1 000 enfants</button><button aria-pressed="false" data-v="ecT">Toutes écoles / 1 000 enfants</button><button aria-pressed="false" data-v="tai">Élèves par école publique</button><button aria-pressed="false" data-v="occ">Classes / maximum</button><button aria-pressed="false" data-v="pub">Part du public</button></div>
       <h3 class="small" style="margin:10px 0 4px;font-weight:600">Année</h3>
       <div class="seg" id="pyr"></div>
-      <p class="small muted" id="pindhelp" style="margin:8px 0 0"></p>
     </div>
+    <div class="card small" id="plegend"></div>
   </div>
   <div class="card" id="pdetail"></div>
   <div class="card prose small" id="pnote">
@@ -710,12 +713,18 @@ const PFC={type:'FeatureCollection',features:PD.arr.slice(1).map(a=>({type:'Feat
 const ptip=d3.select('#ptip');
 // couleurs : rouge = minimum, vert = maximum, sauf pour la taille des écoles (inv) où l'ordre est inversé
 function pscale(){ const v=PD.arr.slice(1).map(pval), inv=PIND[PK].inv; return d3.scaleSequential([d3.min(v),d3.max(v)],inv?t=>d3.interpolateRdYlGn(1-t):d3.interpolateRdYlGn); }
-function pfit(){ const r=document.getElementById('pmap').getBoundingClientRect(); if(!r.width) return; psvg.attr('viewBox',`0 0 ${r.width} ${r.height}`); pproj.fitExtent([[14,14],[r.width-14,r.height-14]],PFC); pdraw(); }
+// cartouche en haut à gauche : titre de la carte et phrase explicative
+function ptitleDraw(){ const I=PIND[PK], Y=I.years;
+  document.getElementById('ptitle').innerHTML=`<b>${ptitle()}</b><p id="pindhelp"></p>`;
+  document.getElementById('pindhelp').textContent=PYR==='evo'?`${I.rel?'Évolution en %':'Écart en points'} entre ${Y[0]} et ${Y[Y.length-1]}. `+I.help(`${Y[0]} et ${Y[Y.length-1]}`):I.help(pyear()); }
+function pfit(){ const r=document.getElementById('pmap').getBoundingClientRect(); if(!r.width) return; psvg.attr('viewBox',`0 0 ${r.width} ${r.height}`);
+  ptitleDraw(); const ct=document.getElementById('ptitle'), top=getComputedStyle(ct).position==='absolute'?ct.offsetTop+ct.offsetHeight+8:14;
+  pproj.fitExtent([[14,top],[r.width-14,r.height-14]],PFC); pdraw(); }
 function pyearSeg(){
   const Y=PIND[PK].years, last=Y[Y.length-1];
   const opts=[['2010','2010'],['2015','2015'],['2020','2020'],['last',String(last)],['evo',`Évolution ${Y[0]}-${last}`]];
   document.getElementById('pyr').innerHTML=opts.map(([v,l])=>`<button aria-pressed="${v===PYR}" data-v="${v}">${l}</button>`).join('');
-  document.querySelectorAll('#pyr button').forEach(b=>b.onclick=()=>{PYR=b.dataset.v; pdraw();});
+  document.querySelectorAll('#pyr button').forEach(b=>b.onclick=()=>{PYR=b.dataset.v; pfit();});
 }
 function pdraw(){
   const I=PIND[PK], sc=pscale(), Y=I.years;
@@ -743,10 +752,10 @@ function pdraw(){
     const y=PYR==='last'?L:+PYR; return J.fmt(J.f(PARIS,y));};
   const pl={nai:'naissances domiciliées',ecT:'écoles publiques et privées pour 1'+NB+'000 enfants',occ:'des classes ouvertes par rapport au maximum 2009-2025',tai:'élèves par école publique',eco:'écoles publiques pour 1'+NB+'000 enfants',nb:'enfants de 2 à 10'+NB+'ans',enf:'d\'enfants de 2 à 10'+NB+'ans dans la population',tot:'d\'élèves scolarisés par rapport aux enfants domiciliés',pub:'des élèves dans le public'};
   const per=PYR==='evo'?'évolution depuis 2010':(PYR==='last'?'dernière année : 2023 pour le recensement, 2025 pour les écoles':PYR);
-  document.getElementById('plegend').innerHTML=`<b>${ptitle()}</b><br>`+st.map(v=>`<span class="sw" style="background:${sc(v)}"></span>${pvfmt(v)}`).join(' ')
+  ptitleDraw();
+  document.getElementById('plegend').innerHTML=`<h3 class="small" style="margin:0 0 6px;font-weight:600">Légende</h3>`+st.map(v=>`<span class="sw" style="background:${sc(v)}"></span>${pvfmt(v)}`).join(' ')
     +`<div style="margin-top:5px;border-top:1px solid var(--line);padding-top:4px"><b>Paris entier</b> <span class="muted">(${per})</span>`+['nb','nai','enf','tot','eco','ecT','tai','occ','pub'].map(k=>`<br><span style="font-weight:${PK===k?700:400}">${pv(k)} ${pl[k]}</span>`).join('')
     +`<br><span class="muted">${PIND[PK].inv?'Vert : valeur la plus faible · rouge : la plus forte.':'Rouge : valeur la plus faible · vert : la plus forte.'}</span></div>`;
-  document.getElementById('pindhelp').textContent=PYR==='evo'?`${I.rel?'Évolution en %':'Écart en points'} entre ${Y[0]} et ${Y[Y.length-1]}. `+I.help(`${Y[0]} et ${Y[Y.length-1]}`):I.help(pyear());
   pdetail();
 }
 const pev=(a,b)=>{const x=100*(b-a)/a; return (x>0?'+':x<0?'−':'')+fmt(Math.abs(x))+NB+'%';};
@@ -800,7 +809,7 @@ function pchart(a){
       tip.style('display',rows.length?'block':'none').style('left',Math.min(x(yr)+10,W-200)+'px').style('top','6px').html(`<b>${yr}</b><br>`+rows.join('<br>')); })
     .on('mouseleave',()=>{cross.style('display','none');tip.style('display','none');});
 }
-document.querySelectorAll('#pind button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#pind button').forEach(x=>x.setAttribute('aria-pressed',x===b)); PK=b.dataset.v; pdraw();});
+document.querySelectorAll('#pind button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#pind button').forEach(x=>x.setAttribute('aria-pressed',x===b)); PK=b.dataset.v; pfit();});
 window.addEventListener('resize',()=>{ if(document.getElementById('t-paris').classList.contains('on')) pfit(); });
 
 let MODE='brush', lasso=[], lassoGeo=null;
