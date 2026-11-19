@@ -705,13 +705,17 @@ function ptitleDraw(){ const I=PIND[PK], Y=I.years;
   document.getElementById('ptitle').innerHTML=`<b>${ptitle()}</b><p id="pindhelp"></p>`;
   document.getElementById('pindhelp').textContent=PYR==='evo'?`${I.rel?'Évolution en %':'Écart en points'} entre ${Y[0]} et ${Y[Y.length-1]}. `+I.help(`${Y[0]} et ${Y[Y.length-1]}`):I.help(pyear()); }
 function pfit(){ const r=document.getElementById('pmap').getBoundingClientRect(); if(!r.width) return; psvg.attr('viewBox',`0 0 ${r.width} ${r.height}`);
-  ptitleDraw(); const ct=document.getElementById('ptitle'), top=getComputedStyle(ct).position==='absolute'?ct.offsetTop+ct.offsetHeight+8:14;
-  pproj.fitExtent([[14,top],[r.width-14,r.height-14]],PFC); pdraw(); }
+  // marge haute fixe : hauteur du plus grand cartouche (toutes cartes, année ou évolution), pour que Paris garde la même taille
+  const ct=document.getElementById('ptitle'); let top=14;
+  if(getComputedStyle(ct).position==='absolute'){ const K=PK, Yr=PYR; let h=0;
+    for(const k of Object.keys(PIND)) for(const y of ['last','evo']){ PK=k; PYR=y; ptitleDraw(); h=Math.max(h,ct.offsetHeight); }
+    PK=K; PYR=Yr; top=ct.offsetTop+h+8; }
+  ptitleDraw(); pproj.fitExtent([[14,top],[r.width-14,r.height-14]],PFC); pdraw(); }
 function pyearSeg(){
   const Y=PIND[PK].years, last=Y[Y.length-1];
   const opts=[['2010','2010'],['2015','2015'],['2020','2020'],['last',String(last)],['evo',`Évolution ${Y[0]}-${last}`]];
   document.getElementById('pyr').innerHTML=opts.map(([v,l])=>`<button aria-pressed="${v===PYR}" data-v="${v}">${l}</button>`).join('');
-  document.querySelectorAll('#pyr button').forEach(b=>b.onclick=()=>{PYR=b.dataset.v; pfit();});
+  document.querySelectorAll('#pyr button').forEach(b=>b.onclick=()=>{PYR=b.dataset.v; pdraw();});
 }
 function pdraw(){
   const I=PIND[PK], sc=pscale(), Y=I.years;
@@ -797,7 +801,7 @@ function pchart(a){
       tip.style('display',rows.length?'block':'none').style('left',Math.min(x(yr)+10,W-200)+'px').style('top','6px').html(`<b>${yr}</b><br>`+rows.join('<br>')); })
     .on('mouseleave',()=>{cross.style('display','none');tip.style('display','none');});
 }
-document.querySelectorAll('#pind button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#pind button').forEach(x=>x.setAttribute('aria-pressed',x===b)); PK=b.dataset.v; pfit();});
+document.querySelectorAll('#pind button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#pind button').forEach(x=>x.setAttribute('aria-pressed',x===b)); PK=b.dataset.v; pdraw();});
 window.addEventListener('resize',()=>{ if(document.getElementById('t-paris').classList.contains('on')) pfit(); });
 
 let MODE='brush', lasso=[], lassoGeo=null;
